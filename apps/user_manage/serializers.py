@@ -7,4 +7,4 @@ class UserManageSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = UserManage
-        fields = '__all__'
+        fields = ['uid', 'nickname', 'avatar_url', 'unionid', 'openid', 'gender', 'city', 'province']
