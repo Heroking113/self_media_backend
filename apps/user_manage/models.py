@@ -1,7 +1,5 @@
 from django.db import models
 
-from utils.common import set_uid
-
 
 class UserManage(models.Model):
     GENDER = (
@@ -10,7 +8,7 @@ class UserManage(models.Model):
         ('2', '女')
     )
 
-    uid = models.CharField(verbose_name='用户对外的ID', max_length=16, default=set_uid())
+    uid = models.CharField(verbose_name='用户对外的ID', max_length=16, default='')
     nickname = models.CharField(verbose_name='昵称', max_length=64, default='')
     avatar_url = models.TextField(verbose_name='头像地址', default='')
     unionid = models.CharField(max_length=256, verbose_name='unionId', blank=True, null=True)
@@ -19,8 +17,8 @@ class UserManage(models.Model):
     gender = models.IntegerField(verbose_name='性别', choices=GENDER, default='0')
     city = models.CharField(max_length=64, verbose_name='城市', blank=True, null=True)
     province = models.CharField(max_length=64, verbose_name='省份', blank=True, null=True)
-    create_time = models.DateTimeField(auto_now_add=True, verbose_name='创建的时间', help_text='创建的时间')
-    lasted_time = models.DateTimeField(auto_now=True, verbose_name='最后一次更新的时间', help_text='最后一次更新的时间')
+    create_time = models.DateTimeField(auto_now_add=True, verbose_name='创建时间')
+    lasted_time = models.DateTimeField(auto_now=True, verbose_name='更新时间')
 
     class Meta:
         db_table = 'user_manage'
@@ -28,7 +26,7 @@ class UserManage(models.Model):
 
 
 class AssetManage(models.Model):
-    uid = models.CharField(verbose_name='用户对外的ID', max_length=16, default=set_uid())
+    uid = models.CharField(verbose_name='用户对外的ID', max_length=16, default='')
 
     class Meta:
         db_table = 'asset_manage'

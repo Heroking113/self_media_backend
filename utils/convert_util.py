@@ -32,8 +32,4 @@ if __name__ == '__main__':
     # u_ret = user_login()
     # user_token = u_ret['data']['token']
     # get_interface_token(user_token)
-    import akshare as ak
-
-    bond_zh_cov_df = ak.bond_zh_cov()
-    print(bond_zh_cov_df)
-    bond_zh_cov_df.to_csv('raw_data.csv', index=False)
+    pass

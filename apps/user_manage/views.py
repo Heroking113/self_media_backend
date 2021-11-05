@@ -1,7 +1,9 @@
+from django.db import transaction
 from rest_framework import viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
+from utils.common import set_uid
 from utils.wx_util import get_openid_session_key_by_code
 from .models import UserManage
 from .serializers import UserManageSerializer
@@ -23,7 +25,7 @@ class UserManageViewSet(viewsets.ModelViewSet):
         if query:
             serializer = self.get_serializer(query[0])
         else:
-            query = UserManage.objects.create(session_key=session_key, openid=openid)
+            query = UserManage.objects.create(session_key=session_key, openid=openid, uid=set_uid())
             serializer = self.get_serializer(query)
 
         return Response(serializer.data)
