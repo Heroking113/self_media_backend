@@ -67,6 +67,8 @@ REST_FRAMEWORK = {
     ),
     # 全局配置异常模块
     'EXCEPTION_HANDLER': 'utils.intercepter.custom_exception_handler',
+    # 分页模块
+    'DEFAULT_PAGINATION_CLASS': 'utils.pagination.DataPageNumberPagination',
 }
 
 
