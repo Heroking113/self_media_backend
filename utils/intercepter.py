@@ -14,13 +14,13 @@ def custom_exception_handler(exc, context):
 
     if response is None:
         return Response({
-            'errMsg': 'server error: {exc}'.format(exc=exc),
-            'statusCode': status.HTTP_500_INTERNAL_SERVER_ERROR,
+            'errmsg': 'server error: {exc}'.format(exc=exc),
+            'status_code': status.HTTP_500_INTERNAL_SERVER_ERROR,
             'exception': True
         })
 
     return Response({
-        'errMsg': '{exc}'.format(exc=exc),
-        'statusCode': response.status_code,
+        'errmsg': '{exc}'.format(exc=exc),
+        'status_code': response.status_code,
         'exception': True
     })

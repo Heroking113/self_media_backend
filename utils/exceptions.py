@@ -8,3 +8,7 @@ class HTTP_404_NOT_FOUND(APIException):
 
 class GET_SESSION_KEY_OPENID_FAIL_598(APIException):
     status_code = 598
+
+
+class HTTP_499_DATA_EXIST(APIException):
+    status_code = 499

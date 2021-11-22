@@ -47,7 +47,9 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'apps.user_manage',
-    'apps.base_convert'
+    'apps.base_convert',
+    'apps.bond_manage',
+    'apps.common_manage'
 ]
 
 MIDDLEWARE = [
@@ -130,8 +132,8 @@ elif ENV == 'PROD':
 
 # ============ Celery配置相关 ==================
 # Celery application definition
-CELERY_BROKER_URL = 'redis://127.0.0.1:7693/0'
-CELERY_RESULT_BACKEND = 'redis://127.0.0.1:7693/1'
+CELERY_BROKER_URL = 'redis://127.0.0.1:6379/0'
+CELERY_RESULT_BACKEND = 'redis://127.0.0.1:6379/1'
 CELERY_ACCEPT_CONTENT = ['application/json']
 CELERY_RESULT_SERIALIZER = 'json'
 CELERY_TASK_SERIALIZER = 'json'
@@ -179,6 +181,11 @@ USE_TZ = False
 # https://docs.djangoproject.com/en/3.1/howto/static-files/
 
 STATIC_URL = '/static/'
+
+# 静态文件路径相关
+MEDIA_URL = "/media/"
+MEDIA_ROOT = os.path.join(BASE_DIR, "media").replace('\\', '/')
+print(MEDIA_ROOT)
 
 # 日志配置
 BASE_LOG_DIR = os.path.join(BASE_DIR, "logs")

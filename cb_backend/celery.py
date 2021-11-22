@@ -31,11 +31,15 @@ app.conf.update(
     CELERY_BEAT_SCHEDULE = {
         'update_base_convert': {
             'task': 'apps.base_convert.tasks.update_base_convert',
-            'schedule': crontab(minute=0, hour='10,12,14,15'),
+            'schedule': crontab(minute=0, hour='10,12,14')
         },
-        # 'report2': {
-        #     'task': 'apps.base_convert.tasks.report',
-        #     'schedule': crontab(minute='5', hour=14),
-        # }
+        'update_base_convert_close_price': {
+            'task': 'apps.base_convert.tasks.update_base_convert_close_price',
+            'schedule': crontab(minute='5', hour='15'),
+        },
+        'rm_7days_before': {
+            'task': 'apps.base_convert.tasks.rm_7days_before',
+            'schedule': crontab(minute=0, hour=0, day_of_week='1'),
+        }
     }
 )

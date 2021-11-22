@@ -3,7 +3,7 @@ from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
 
 
-DEFAULT_PAGE_SIZE = 10
+DEFAULT_PAGE_SIZE = 18
 
 class DataPageNumberPagination(PageNumberPagination):
 
@@ -27,4 +27,4 @@ class DataPageNumberPagination(PageNumberPagination):
 
 
 class CommentMsgPagination(DataPageNumberPagination):
-    page_size = 10
+    page_size = DEFAULT_PAGE_SIZE

@@ -13,11 +13,23 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
+from django.conf import settings
+from django.conf.urls import url
 from django.contrib import admin
 from django.urls import path, include
+from django.views.static import serve
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('user/', include('apps.user_manage.urls')),
-    path('bc/', include('apps.base_convert.urls'))
+    path('bc/', include('apps.base_convert.urls')),
+    path('bm/', include('apps.bond_manage.urls')),
+    path('cm/', include('apps.common_manage.urls'))
 ]
+
+# 开发环境下，通过此配置可获取后台的静态文件；生产环境下用nginx获取静态文件
+if settings.ENV == 'DEV':
+    urlpatterns += [
+        url(r'^media/(?P<path>.*)$', serve, {'document_root': settings.MEDIA_ROOT})
+    ]
+
