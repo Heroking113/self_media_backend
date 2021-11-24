@@ -5,18 +5,29 @@ from rest_framework import viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
+from utils.common import update_base_convert_data
 from utils.redis_cli import redisCli
 from .models import BaseConvert
 from .serializers import BaseConvertSerializer
 
 
 class BaseConvertViewSet(viewsets.ModelViewSet):
-    queryset = BaseConvert.objects.all().order_by('-id')
+    queryset = BaseConvert.objects.all()
     serializer_class = BaseConvertSerializer
+
+    def list(self, request, *args, **kwargs):
+        uid = request.query_params.get('uid', '')
+        queryset = self.filter_queryset(self.get_queryset())
+        page = self.paginate_queryset(queryset)
+        serializer = self.get_serializer(page, many=True)
+        ret_data = BaseConvert.format_ret_data(uid, serializer.data)
+        return self.get_paginated_response(ret_data)
 
     @action(methods=['GET'], detail=False)
     def test(self, request):
-
+        # ret = BaseConvert.get_format_list_dic_data()
+        # ret = redisCli.get('base_convert')
+        update_base_convert_data()
         # dic = {'a': 1}
         # redisCli.set('dic', dic)
         # li_dic = [{'a': 1}, {'b': 2, 'c': 3}]
@@ -26,22 +37,19 @@ class BaseConvertViewSet(viewsets.ModelViewSet):
 
     @action(methods=['GET'], detail=False)
     def cus_inquire(self, request):
-        s_val = request.query_params.get('s_val')
+        uid = request.query_params.get('uid', '')
+        s_val = request.query_params.get('s_val', '')
         s_query = BaseConvert.objects.filter(Q(bond_code__contains=s_val) | Q(bond_abbr__contains=s_val) | Q(underly_abbr__contains=s_val))
         page = self.paginate_queryset(s_query)
-        if page is not None:
-            serializer = self.get_serializer(page, many=True)
-            return self.get_paginated_response(serializer.data)
+        serializer = self.get_serializer(page, many=True)
+        ret_data = BaseConvert.format_ret_data(uid, serializer.data)
+        return self.get_paginated_response(ret_data)
 
     @action(methods=['GET'], detail=False)
     def double_low_data(self, request):
         page = int(request.query_params.get('page', 1))
         dl_pages = redisCli.get('dl_pages')
-        if page > 3:
-            return Response({
-                'next': '',
-                'results': []
-            })
+
         if dl_pages:
             if page > dl_pages:
                 return Response({
@@ -55,9 +63,7 @@ class BaseConvertViewSet(viewsets.ModelViewSet):
                 'results': ret_data
             })
 
-        queryset = self.filter_queryset(self.get_queryset())
-        serializer = self.get_serializer(queryset, many=True)
-        ret_data = BaseConvert.get_double_low_data(serializer.data)
+        ret_data = BaseConvert.get_save_double_low_data()
         return Response(ret_data)
 
 

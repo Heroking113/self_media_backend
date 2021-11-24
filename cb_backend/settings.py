@@ -185,7 +185,6 @@ STATIC_URL = '/static/'
 # 静态文件路径相关
 MEDIA_URL = "/media/"
 MEDIA_ROOT = os.path.join(BASE_DIR, "media").replace('\\', '/')
-print(MEDIA_ROOT)
 
 # 日志配置
 BASE_LOG_DIR = os.path.join(BASE_DIR, "logs")

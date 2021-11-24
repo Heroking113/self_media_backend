@@ -22,11 +22,53 @@ class SelfChooseManageViewSet(viewsets.ModelViewSet):
 
     def list(self, request, *args, **kwargs):
         uid = request.query_params.get('uid', '')
-        dic_bond_codes = list(SelfChooseManage.objects.filter(uid=uid).values('bond_code'))
+        dic_bond_codes = list(SelfChooseManage.objects.filter(uid=uid).values('bond_code', 'priority'))
         bond_codes = [item['bond_code'] for item in dic_bond_codes]
         base_bd_query = BaseConvert.objects.filter(bond_code__in=bond_codes)
         serializer = BaseConvertSerializer(base_bd_query, many=True)
-        return Response(serializer.data)
+
+        if not dic_bond_codes[0]['priority']:
+            return Response(serializer.data)
+
+        ret_data = []
+        for item in serializer.data:
+            for i_ in dic_bond_codes:
+                if item['bond_code'] == i_['bond_code']:
+                    item['priority'] = i_['priority']
+                    ret_data.append(item)
+                    break
+
+        ret_data = sorted(ret_data, key=lambda e: e.__getitem__('priority'))
+        return Response(ret_data)
+
+    @action(methods=['GET'], detail=False)
+    def indv_data(self, request):
+        uid = request.query_params.get('uid', '')
+        query = SelfChooseManage.objects.filter(uid=uid).values('bond_abbr', 'bond_code', 'priority')
+        if not query:
+            return Response([])
+        if query[0]['priority']:
+            query = sorted(query, key=lambda e: e.__getitem__('priority'))
+        return Response(query)
+
+    @action(methods=['POST'], detail=False)
+    def update_sort(self, request):
+        uid = request.data.get('uid', '')
+        code_priority = request.data.get('code_priority', [])
+        with transaction.atomic():
+            for item in code_priority:
+                ret = SelfChooseManage.objects.select_for_update().get(Q(uid=uid) & Q(bond_code=item['code']))
+                ret.priority = item['priority']
+                ret.save()
+        return Response()
+
+    @action(methods=['POST'], detail=False)
+    def bulk_del(self, request):
+        uid = request.data.get('uid', '')
+        bond_codes = request.data.get('bond_codes', [])
+        with transaction.atomic():
+            SelfChooseManage.objects.select_for_update().filter(Q(uid=uid) & Q(bond_code__in=bond_codes)).delete()
+        return Response()
 
 
 class OwnConvertBondViewSet(viewsets.ModelViewSet):
@@ -45,10 +87,20 @@ class OwnConvertBondViewSet(viewsets.ModelViewSet):
 
     def list(self, request, *args, **kwargs):
         uid = request.query_params.get('uid', '')
-        query = OwnConvertBond.objects.filter(uid=uid)
+        query = OwnConvertBond.objects.filter(uid=uid).order_by('priority')
         serializer = self.get_serializer(query, many=True)
         ret_data = OwnConvertBond.handle_serializer_data(serializer.data)
         return Response(ret_data)
+
+    @action(methods=['GET'], detail=False)
+    def indv_data(self, request):
+        uid = request.query_params.get('uid', '')
+        query = OwnConvertBond.objects.filter(uid=uid).values('bond_abbr', 'bond_code', 'priority')
+        if not query:
+            return Response([])
+        if query[0]['priority']:
+            query = sorted(query, key = lambda e:e.__getitem__('priority'))
+        return Response(query)
 
     @action(methods=['GET'], detail=False)
     def bulk_create(self, request):
@@ -83,6 +135,25 @@ class OwnConvertBondViewSet(viewsets.ModelViewSet):
             # raise Exception('error test')
         return Response()
 
+    @action(methods=['POST'], detail=False)
+    def update_sort(self, request):
+        uid = request.data.get('uid', '')
+        code_priority = request.data.get('code_priority', [])
+        with transaction.atomic():
+            for item in code_priority:
+                ret = OwnConvertBond.objects.select_for_update().get(Q(uid=uid) & Q(bond_code=item['code']))
+                ret.priority = item['priority']
+                ret.save()
+        return Response()
+
+    @action(methods=['POST'], detail=False)
+    def bulk_del(self, request):
+        uid = request.data.get('uid', '')
+        bond_codes = request.data.get('bond_codes', [])
+        with transaction.atomic():
+            OwnConvertBond.objects.select_for_update().filter(Q(uid=uid) & Q(bond_code__in=bond_codes)).delete()
+        return Response()
+
 
 class DayProfitLossConvertBondViewSet(viewsets.ModelViewSet):
     queryset = DayProfitLossConvertBond.objects.all()
@@ -102,4 +173,3 @@ class DayProfitLossConvertBondViewSet(viewsets.ModelViewSet):
         serializer = self.get_serializer(queryset, many=True)
         data = DayProfitLossConvertBond.format_res_data(ownConvertIds, serializer.data)
         return Response(data)
-

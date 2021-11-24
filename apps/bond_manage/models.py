@@ -15,15 +15,14 @@ class SelfChooseManage(models.Model):
         verbose_name_plural = verbose_name = '自选可转债'
 
 
-
 class OwnConvertBond(models.Model):
     """持有可转债"""
 
     uid = models.CharField(verbose_name='用户对外ID', max_length=16)
     bond_abbr = models.CharField(verbose_name='债券简称', max_length=256)
     bond_code = models.CharField(verbose_name='债券代码', max_length=256)
-    hold_num = models.IntegerField(verbose_name='持有数量', default=0)
-    hold_cost = models.FloatField(verbose_name='持有成本', default=0)
+    hold_num = models.IntegerField(verbose_name='持有数量')
+    hold_cost = models.FloatField(verbose_name='持有成本')
     priority = models.IntegerField(verbose_name='显示的优先级', default=0)
     create_time = models.DateTimeField(verbose_name='创建时间', auto_now_add=True)
 
