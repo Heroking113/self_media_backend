@@ -24,5 +24,5 @@ class OwnConvertBondAdmin(admin.ModelAdmin):
 
 @admin.register(DayProfitLossConvertBond)
 class DayProfitLossConvertBondAdmin(admin.ModelAdmin):
-    list_display = ('id', 'convert_id', 'bond_abbr', 'bond_code', 'quote_change', 'pre_day_fund', 'create_time')
+    list_display = ('id', 'uid', 'bond_abbr', 'bond_code', 'day_quote_change', 'day_pl', 'create_time')
     list_per_page = 100

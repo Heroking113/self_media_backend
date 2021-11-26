@@ -8,11 +8,13 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 
 from utils.exceptions import HTTP_499_DATA_EXIST
+from utils.format_ret_data import format_bond_manage_ocb_list_ret_data
 from .models import OwnConvertBond, DayProfitLossConvertBond, SelfChooseManage
 
 from .serializers import OwnConvertBondSerializer, DayProfitLossConvertBondSerializer, SelfChooseManageSerializer
 from ..base_convert.models import BaseConvert
 from ..base_convert.serializers import BaseConvertSerializer
+from ..user_manage.models import AssetManage
 
 
 class SelfChooseManageViewSet(viewsets.ModelViewSet):
@@ -32,6 +34,7 @@ class SelfChooseManageViewSet(viewsets.ModelViewSet):
 
         ret_data = []
         for item in serializer.data:
+            item = dict(item)
             for i_ in dic_bond_codes:
                 if item['bond_code'] == i_['bond_code']:
                     item['priority'] = i_['priority']
@@ -39,6 +42,7 @@ class SelfChooseManageViewSet(viewsets.ModelViewSet):
                     break
 
         ret_data = sorted(ret_data, key=lambda e: e.__getitem__('priority'))
+        ret_data.reverse()
         return Response(ret_data)
 
     @action(methods=['GET'], detail=False)
@@ -49,6 +53,7 @@ class SelfChooseManageViewSet(viewsets.ModelViewSet):
             return Response([])
         if query[0]['priority']:
             query = sorted(query, key=lambda e: e.__getitem__('priority'))
+            query.reverse()
         return Response(query)
 
     @action(methods=['POST'], detail=False)
@@ -77,19 +82,41 @@ class OwnConvertBondViewSet(viewsets.ModelViewSet):
     pagination_class = None
 
     def create(self, request, *args, **kwargs):
+        """
+        创建数据：
+            如果当天已经有总资产数据，则更新总资产数据
+        """
         data = request.data
         uid = data.get('uid', '')
         bond_code = data.get('bond_code', '')
         query = OwnConvertBond.objects.filter(Q(bond_code=bond_code) & Q(uid=uid))
         if query:
             raise HTTP_499_DATA_EXIST('该条数据已存在')
-        return super(OwnConvertBondViewSet, self).create(request, *args, **kwargs)
+
+        serializer = self.get_serializer(data=data)
+        with transaction.atomic():
+            # 创建新数据
+            serializer.is_valid(raise_exception=True)
+            self.perform_create(serializer)
+
+            # 更新总资产数据
+            cur_bond_price = BaseConvert.objects.get(bond_code=bond_code).cur_bond_price
+            hold_num = int(data.get('hold_num', 0))
+
+            asset_query = AssetManage.objects.select_for_update().filter(
+                Q(uid=uid) & Q(create_time__gte=datetime.now().date())
+            )
+            if asset_query:
+                day_asset = float(asset_query[0].day_asset) + float(cur_bond_price) * hold_num
+                asset_query.update(day_asset=day_asset)
+
+        return Response(serializer.data)
 
     def list(self, request, *args, **kwargs):
         uid = request.query_params.get('uid', '')
-        query = OwnConvertBond.objects.filter(uid=uid).order_by('priority')
+        query = OwnConvertBond.objects.filter(uid=uid).order_by('-priority')
         serializer = self.get_serializer(query, many=True)
-        ret_data = OwnConvertBond.handle_serializer_data(serializer.data)
+        ret_data = format_bond_manage_ocb_list_ret_data(serializer.data)
         return Response(ret_data)
 
     @action(methods=['GET'], detail=False)
@@ -100,39 +127,27 @@ class OwnConvertBondViewSet(viewsets.ModelViewSet):
             return Response([])
         if query[0]['priority']:
             query = sorted(query, key = lambda e:e.__getitem__('priority'))
+            query.reverse()
         return Response(query)
 
     @action(methods=['GET'], detail=False)
     def bulk_create(self, request):
         """批量创建测试数据"""
         uid = request.query_params.get('uid', '')
-        li = [{"id": 1, "bond_abbr": "麒麟转债", "bond_code": "127050"},
-              {"id": 2, "bond_abbr": "苏租转债", "bond_code": "110083"},
-              {"id": 3, "bond_abbr": "设研转债", "bond_code": "123130"},
-              {"id": 4, "bond_abbr": "希望转2", "bond_code": "127049"},
-              {"id": 5, "bond_abbr": "天合转债", "bond_code": "118002"},
-              {"id": 7, "bond_abbr": "宏发转债", "bond_code": "110082"},
-              {"id": 8, "bond_abbr": "中大转债", "bond_code": "127048"},
-              {"id": 9, "bond_abbr": "皖天转债", "bond_code": "113631"},
-              {"id": 10, "bond_abbr": "锦鸡转债", "bond_code": "123129"},
-              {"id": 11, "bond_abbr": "山玻转债", "bond_code": "111001"},
-              {"id": 17, "bond_abbr": "耐普转债", "bond_code": "123127"}]
+        hold_bonds = OwnConvertBond.objects.filter(uid=uid).values('bond_code', 'bond_abbr')
+
         create_data = []
-        for i in range(10):
-            for item in li:
+        for item in hold_bonds:
+            for i in range(100):
                 create_data.append(DayProfitLossConvertBond(
                     uid=uid,
-                    convert_id=item['id'],
-                    bond_abbr=item['bond_abbr'],
                     bond_code=item['bond_code'],
-                    quote_change=round(uniform(-0.5, 0.5), 2),
-                    pre_day_fund=randint(100, 5000),
-                    create_time=datetime.today() + timedelta(-(i+1))
+                    bond_abbr=item['bond_abbr'],
+                    day_quote_change=round(uniform(-0.5, 0.5), 2),
+                    day_pl=randint(100, 5000),
+                    create_time=datetime.today() + timedelta(-(i + 1))
                 ))
-
-        with transaction.atomic():
-            DayProfitLossConvertBond.objects.bulk_create(create_data)
-            # raise Exception('error test')
+        DayProfitLossConvertBond.objects.bulk_create(create_data)
         return Response()
 
     @action(methods=['POST'], detail=False)
@@ -148,9 +163,35 @@ class OwnConvertBondViewSet(viewsets.ModelViewSet):
 
     @action(methods=['POST'], detail=False)
     def bulk_del(self, request):
+        """
+        批量删除可转债：
+            当天如果有总资产数据，则更新；
+            删除相关的可转债日盈亏数据；
+            删除该批可转债数据。
+        """
         uid = request.data.get('uid', '')
         bond_codes = request.data.get('bond_codes', [])
         with transaction.atomic():
+            # 更新当日总资产
+            base_convert = BaseConvert.objects.filter(bond_code__in=bond_codes).values('bond_code', 'cur_bond_price')
+            own_convert = list(OwnConvertBond.objects.select_for_update().filter(Q(uid=uid) & Q(bond_code__in=bond_codes)))
+            reduced_asset = 0
+            for bc in base_convert:
+                for oc in own_convert:
+                    if bc['bond_code'] == oc.bond_code:
+                        asset = 0 if not bc['cur_bond_price'] else float(bc['cur_bond_price']) * oc.hold_num
+                        reduced_asset += asset
+                        break
+            query = AssetManage.objects.select_for_update().filter(Q(uid=uid) & Q(create_time__gte=datetime.now().date()))
+            if query:
+                day_asset = float(query[0].day_asset) - reduced_asset
+                day_asset = day_asset if day_asset >=0 else 0
+                query.update(day_asset=day_asset)
+
+            # 删除可转债的日盈亏数据
+            DayProfitLossConvertBond.objects.select_for_update().filter(Q(uid=uid) & Q(bond_code__in=bond_codes)).delete()
+
+            # 删除可转债
             OwnConvertBond.objects.select_for_update().filter(Q(uid=uid) & Q(bond_code__in=bond_codes)).delete()
         return Response()
 
@@ -163,7 +204,6 @@ class DayProfitLossConvertBondViewSet(viewsets.ModelViewSet):
 
     def list(self, request, *args, **kwargs):
         uid = request.query_params.get('uid', '')
-        ownConvertIds = OwnConvertBond.objects.filter(uid=uid).values('id')
         before_days = int(request.query_params.get('before_days', 0))
         if not before_days:
             queryset = DayProfitLossConvertBond.objects.filter(uid=uid).order_by('-id')
@@ -171,5 +211,4 @@ class DayProfitLossConvertBondViewSet(viewsets.ModelViewSet):
             before_date = datetime.today() + timedelta(-(before_days+1))
             queryset = DayProfitLossConvertBond.objects.filter(Q(uid=uid) & Q(create_time__gte=before_date)).order_by('-id')
         serializer = self.get_serializer(queryset, many=True)
-        data = DayProfitLossConvertBond.format_res_data(ownConvertIds, serializer.data)
-        return Response(data)
+        return Response(serializer.data)

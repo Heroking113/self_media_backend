@@ -25,14 +25,8 @@ class BaseConvertViewSet(viewsets.ModelViewSet):
 
     @action(methods=['GET'], detail=False)
     def test(self, request):
-        # ret = BaseConvert.get_format_list_dic_data()
-        # ret = redisCli.get('base_convert')
-        update_base_convert_data()
-        # dic = {'a': 1}
-        # redisCli.set('dic', dic)
-        # li_dic = [{'a': 1}, {'b': 2, 'c': 3}]
-        # redisCli.set('li_dic', li_dic)
-        # ret = redisCli.get('li_dic')
+        base_query = BaseConvert.objects.all()
+        base_query = list(base_query)
         return Response()
 
     @action(methods=['GET'], detail=False)

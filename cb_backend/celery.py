@@ -23,6 +23,17 @@ app.conf.timezone = "Asia/Shanghai"
 # 加上这句话celery会自动发现这些模块中的task，实际上这句话可以省略。
 app.autodiscover_tasks()
 
+"""
+后台定时任务：
+- 刷新基础的可转债数据：
+  - 每天10:00，12:00，14:00，仅刷新数据到mysql和redis
+  - 每天15:10，刷新数据到mysql和redis，同时存储数据到本地
+- 删除7天前的可转债基础数据文件：每天0：00处理
+- 统计持有总资产：每天15:15统计一遍
+- 统计持有总盈亏：每天15:15统计一遍
+- 统计每支可转债盈亏：每天15:15统计一遍
+
+"""
 # 允许root 用户运行celery
 platforms.C_FORCE_ROOT = True
 

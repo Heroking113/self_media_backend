@@ -21,4 +21,3 @@ def rm_7days_before():
     """移除超过7天的文件，避免占用过多空间"""
     rmd_filenames = get_7_days_before()
     rm_7_days_before(rmd_filenames)
-    print('execute rm_7days_before()..')

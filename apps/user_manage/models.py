@@ -28,7 +28,12 @@ class UserManage(models.Model):
 
 
 class AssetManage(models.Model):
-    """资产管理"""
+    """资产管理：每天下午15：10统计一遍
+        当日总资产 = sum(可转债现价 * 持有的可转债数量)
+            如果删除A可转债，当日总资产 = 现有总资产 - A可转债现价 * 持有数量
+        当日盈亏 = sum(持有的可转债A的数量 *（可转债A的现价-可转债A的昨日收盘价）/ 可转债A的昨日收盘价)
+            如果删除A可转债，当日盈亏不影响
+    """
 
     uid = models.CharField(verbose_name='用户对外的ID', max_length=16, default='')
     day_asset = models.DecimalField(verbose_name='当日总资产', max_digits=13, decimal_places=2, default=0)
