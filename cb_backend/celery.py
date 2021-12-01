@@ -46,11 +46,19 @@ app.conf.update(
         },
         'update_base_convert_close_price': {
             'task': 'apps.base_convert.tasks.update_base_convert_close_price',
-            'schedule': crontab(minute='5', hour='15'),
+            'schedule': crontab(minute=10, hour=15),
         },
         'rm_7days_before': {
             'task': 'apps.base_convert.tasks.rm_7days_before',
-            'schedule': crontab(minute=0, hour=0, day_of_week='1'),
+            'schedule': crontab(minute=0, hour=0, day_of_week=1),
+        },
+        'statistic_asset_pl': {
+            'task': 'apps.user_manage.tasks.statistic_asset_pl',
+            'schedule': crontab(minute=15, hour=15)
+        },
+        'statistic_day_bond_pl': {
+            'task': 'apps.bond_manage.tasks.statistic_day_bond_pl',
+            'schedule': crontab(minute=15, hour=15)
         }
     }
 )

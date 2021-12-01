@@ -9,6 +9,7 @@ from utils.common import update_base_convert_data
 from utils.redis_cli import redisCli
 from .models import BaseConvert
 from .serializers import BaseConvertSerializer
+from .tasks import rm_7days_before
 
 
 class BaseConvertViewSet(viewsets.ModelViewSet):
@@ -23,11 +24,12 @@ class BaseConvertViewSet(viewsets.ModelViewSet):
         ret_data = BaseConvert.format_ret_data(uid, serializer.data)
         return self.get_paginated_response(ret_data)
 
-    @action(methods=['GET'], detail=False)
-    def test(self, request):
-        base_query = BaseConvert.objects.all()
-        base_query = list(base_query)
-        return Response()
+    # @action(methods=['GET'], detail=False)
+    # def test(self, request):
+    #     # rm_7days_before()
+    #     # base_query = BaseConvert.objects.all()
+    #     # base_query = list(base_query)
+    #     return Response({'api url: /bc/test/'})
 
     @action(methods=['GET'], detail=False)
     def cus_inquire(self, request):

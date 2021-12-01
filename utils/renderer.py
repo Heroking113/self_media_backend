@@ -5,12 +5,9 @@ class CustomRenderer(JSONRenderer):
     # 重构render方法
     def render(self, data, accepted_media_type=None, renderer_context=None):
         if renderer_context:
-            # print(renderer_context)
-            # print(renderer_context["response"].status_code)
 
             # 响应的信息，成功和错误的都是这个
             # 成功和异常响应的信息，异常信息在前面自定义异常处理中已经处理为{'message': 'error'}这种格式
-            # print(data)
 
             # 如果返回的data为字典
             if isinstance(data, dict):

@@ -30,9 +30,9 @@ def get_7_days_before():
     return rmd_filenames
 
 
-def rm_7_days_before(rmd_filenames):
+def handle_rm_7_days_before(rmd_filenames):
     """移除一周前的一周数据"""
-    file_path = BASE_DIR + '/media/'
+    file_path = str(settings.BASE_DIR) + '/media/base_convert_data/'
     filenames = os.listdir(file_path)
     for itm in filenames:
         if itm in rmd_filenames:
@@ -60,7 +60,8 @@ def update_base_convert_data(is_save_file=False):
 
         # 用以获取昨日收盘价
         ini_filename = (datetime.today() + timedelta(-1)).strftime('%Y-%m-%d') + '-可转债数据.csv'
-        ini_path = str(settings.BASE_DIR) + '/media/' + ini_filename
+        ini_path_root = str(settings.BASE_DIR) + '/media/base_convert_data/'
+        ini_path = ini_path_root + ini_filename
         csv_data = pd.read_csv(ini_path, low_memory=False)
         csv_df = pd.DataFrame(csv_data)
         for r in bond_zh_cov_df.values:
@@ -96,7 +97,7 @@ def update_base_convert_data(is_save_file=False):
     if is_save_file:
         # 将新的数据存储到本地文档
         tar_filename = time.strftime("%Y-%m-%d", time.localtime(time.time())) + '-可转债数据.csv'
-        tar_path = str(settings.BASE_DIR) + '/media/' + tar_filename
+        tar_path = str(settings.BASE_DIR) + '/media/base_convert_data/' + tar_filename
         bond_zh_cov_df.to_csv(tar_path)
 
 

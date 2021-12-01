@@ -1,7 +1,7 @@
 from __future__ import absolute_import
 from celery import shared_task
 
-from utils.common import get_7_days_before, rm_7_days_before, update_base_convert_data
+from utils.common import get_7_days_before, handle_rm_7_days_before, update_base_convert_data
 
 
 @shared_task
@@ -20,4 +20,4 @@ def update_base_convert_close_price():
 def rm_7days_before():
     """移除超过7天的文件，避免占用过多空间"""
     rmd_filenames = get_7_days_before()
-    rm_7_days_before(rmd_filenames)
+    handle_rm_7_days_before(rmd_filenames)

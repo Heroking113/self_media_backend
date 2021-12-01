@@ -10,12 +10,20 @@ from utils.common import set_uid
 from utils.wx_util import get_openid_session_key_by_code
 from .models import UserManage, AssetManage
 from .serializers import UserManageSerializer, AssetManageSerializer
+from .tasks import statistic_asset_pl
 
 
 class UserManageViewSet(viewsets.ModelViewSet):
     queryset = UserManage.objects.all()
     serializer_class = UserManageSerializer
     pagination_class = None
+
+    # @action(methods=['GET'], detail=False)
+    # def test(self, request):
+    #
+    #     statistic_asset_pl()
+    #
+    #     return Response({'api url: /user/bs/test/'})
 
     def list(self, request, *args, **kwargs):
         uid = request.query_params.get('uid', '')

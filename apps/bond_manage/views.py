@@ -12,6 +12,7 @@ from utils.format_ret_data import format_bond_manage_ocb_list_ret_data
 from .models import OwnConvertBond, DayProfitLossConvertBond, SelfChooseManage
 
 from .serializers import OwnConvertBondSerializer, DayProfitLossConvertBondSerializer, SelfChooseManageSerializer
+from .tasks import statistic_day_bond_pl
 from ..base_convert.models import BaseConvert
 from ..base_convert.serializers import BaseConvertSerializer
 from ..user_manage.models import AssetManage
@@ -80,6 +81,11 @@ class OwnConvertBondViewSet(viewsets.ModelViewSet):
     queryset = OwnConvertBond.objects.all()
     serializer_class = OwnConvertBondSerializer
     pagination_class = None
+
+    # @action(methods=['GET'], detail=False)
+    # def test(self,request):
+    #     # statistic_day_bond_pl()
+    #     return Response({'api url: /bm/ocb/test/'})
 
     def create(self, request, *args, **kwargs):
         """
