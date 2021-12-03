@@ -19,6 +19,7 @@ from django.contrib import admin
 from django.urls import path, include
 from django.views.static import serve
 
+# 可转债小程序路由
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('user/', include('apps.user_manage.urls')),
@@ -26,6 +27,12 @@ urlpatterns = [
     path('bm/', include('apps.bond_manage.urls')),
     path('cm/', include('apps.common_manage.urls'))
 ]
+
+# 中山大学小程序路由
+urlpatterns += [
+    path('zsdx/user/', include('apps.zsdx_user_manage.urls'))
+]
+
 
 # 开发环境下，通过此配置可获取后台的静态文件；生产环境下用nginx获取静态文件
 if settings.ENV == 'DEV':

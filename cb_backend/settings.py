@@ -48,7 +48,8 @@ INSTALLED_APPS = [
     'apps.user_manage',
     'apps.base_convert',
     'apps.bond_manage',
-    'apps.common_manage'
+    'apps.common_manage',
+    'apps.zsdx_user_manage'
 ]
 
 MIDDLEWARE = [
