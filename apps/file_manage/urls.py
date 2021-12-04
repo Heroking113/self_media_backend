@@ -1,11 +1,11 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 
-from .views import ZsdxUserManageViewSet
+from .views import ImageFileViewSet
 
 
 router = DefaultRouter()
-router.register(r'', ZsdxUserManageViewSet)
+router.register(r'', ImageFileViewSet)
 
 urlpatterns = [
     path('', include(router.urls)),

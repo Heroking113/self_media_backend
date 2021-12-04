@@ -30,7 +30,10 @@ urlpatterns = [
 
 # 中山大学小程序路由
 urlpatterns += [
-    path('zsdx/user/', include('apps.zsdx_user_manage.urls'))
+    path('zsdx/user/', include('apps.zsdx_user_manage.urls')),
+    path('zsdx/idle/', include('apps.idle_manage.urls')),
+    path('zsdx/mood/', include('apps.mood_manage.urls')),
+    path('zsdx/file/', include('apps.file_manage.urls'))
 ]
 
 

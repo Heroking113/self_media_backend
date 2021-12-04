@@ -1,16 +1,15 @@
 from rest_framework import serializers
 
-from .models import ZsdxUserManage
+from .models import MoodManage
 
 
-class ZsdxUserManageSerializer(serializers.ModelSerializer):
+class MoodManageSerializer(serializers.ModelSerializer):
 
     class Meta:
-        model = ZsdxUserManage
+        model = MoodManage
         fields = '__all__'
 
     def to_representation(self, instance):
         data = super().to_representation(instance)
-        data.update(gender=instance.get_gender_display())
         data.update(create_time=str(instance.create_time).split('.')[0])
         return data

@@ -29,8 +29,8 @@ APP_SECRET = '06ed44a39bce2c6fe897f22ef892f5a7'
 # 开发环境：True；生产环境：False
 DEBUG = True
 # DEV：开发环境；PROD：生产环境
-# ENV = 'DEV'
-ENV = 'PROD'
+ENV = 'DEV'
+# ENV = 'PROD'
 
 ALLOWED_HOSTS = ['*']
 
@@ -49,7 +49,10 @@ INSTALLED_APPS = [
     'apps.base_convert',
     'apps.bond_manage',
     'apps.common_manage',
-    'apps.zsdx_user_manage'
+    'apps.zsdx_user_manage',
+    'apps.file_manage',
+    'apps.idle_manage',
+    'apps.mood_manage'
 ]
 
 MIDDLEWARE = [

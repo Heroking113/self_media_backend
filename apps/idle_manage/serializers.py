@@ -1,16 +1,16 @@
 from rest_framework import serializers
 
-from .models import ZsdxUserManage
+from .models import IdleManage
 
 
-class ZsdxUserManageSerializer(serializers.ModelSerializer):
+class IdleManageSerializer(serializers.ModelSerializer):
 
     class Meta:
-        model = ZsdxUserManage
+        model = IdleManage
         fields = '__all__'
 
     def to_representation(self, instance):
         data = super().to_representation(instance)
-        data.update(gender=instance.get_gender_display())
+        data.update(order_status=instance.get_order_status_display())
         data.update(create_time=str(instance.create_time).split('.')[0])
         return data
