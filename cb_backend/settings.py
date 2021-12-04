@@ -29,8 +29,8 @@ APP_SECRET = '06ed44a39bce2c6fe897f22ef892f5a7'
 # 开发环境：True；生产环境：False
 DEBUG = True
 # DEV：开发环境；PROD：生产环境
-ENV = 'DEV'
-# ENV = 'PROD'
+# ENV = 'DEV'
+ENV = 'PROD'
 
 ALLOWED_HOSTS = []
 
@@ -123,7 +123,7 @@ elif ENV == 'PROD':
             'ENGINE': 'django.db.backends.mysql',  # 指定数据库驱动
             'NAME': 'cb_db',  # 指定的数据库名
             'USER': 'root',  # 数据库登录的用户名
-            'PASSWORD': 'Heroking113.',  # 登录数据库的密码
+            'PASSWORD': 'Kzzbackend666.',  # 登录数据库的密码
             'HOST': 'localhost',
             'PORT': 6895  # 数据库服务器端口，mysql默认为3306
         }
