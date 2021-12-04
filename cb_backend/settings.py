@@ -182,6 +182,8 @@ USE_TZ = False
 
 STATIC_URL = '/static/'
 
+STATIC_ROOT = os.path.join(BASE_DIR, "static").replace('\\', '/')
+
 # 静态文件路径相关
 MEDIA_URL = "/media/"
 MEDIA_ROOT = os.path.join(BASE_DIR, "media").replace('\\', '/')
