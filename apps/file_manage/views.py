@@ -20,8 +20,3 @@ class ImageFileViewSet(viewsets.ModelViewSet):
         queryset = self.get_queryset()
         img_paths = [settings.DOMAIN + '/media/' + i['file_path'] for i in queryset.values('file_path')]
         return Response(img_paths)
-
-    @action(methods=['POST'], detail=False)
-    def test(self, request):
-        ImageFile.objects.filter(id=7).delete()
-        return Response()

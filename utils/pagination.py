@@ -27,4 +27,4 @@ class DataPageNumberPagination(PageNumberPagination):
 
 
 class CommentMsgPagination(DataPageNumberPagination):
-    page_size = DEFAULT_PAGE_SIZE
+    page_size = 25
