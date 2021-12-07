@@ -1,5 +1,6 @@
 from datetime import timedelta, datetime
 
+from django.conf import settings
 from django.db import transaction
 from django.db.models import Q
 from rest_framework import viewsets
@@ -28,7 +29,9 @@ class UserManageViewSet(viewsets.ModelViewSet):
     def login(self, request):
         js_code = request.data.get('js_code', '')
         # 获取 session_key 和 openid
-        dic_session_key_openid = get_openid_session_key_by_code(js_code)
+        app_id = settings.APP_ID
+        app_secret = settings.APP_SECRET
+        dic_session_key_openid = get_openid_session_key_by_code(js_code, app_id, app_secret)
         session_key = dic_session_key_openid['session_key']
         openid = dic_session_key_openid['openid']
 

@@ -129,3 +129,23 @@ def base_convert_li_dic(li, yes_close_price):
 def datetime_format(datetime):
     date, tim_ = datetime.split('T')
     return ' '.join([date, tim_.split('.')[0]])
+
+
+def change_img_size(file_path, compress_rate=0.6):
+    from PIL import Image
+    import io
+    img = Image.open(file_path)
+    img_byteArr = io.BytesIO()
+    img.save(img_byteArr, format='png')
+    buffer = img_byteArr.getvalue()
+    kb_size = len(buffer) / 1e3
+
+    while kb_size > 500:
+        w, h = img.size
+        img = img.resize((int(w*compress_rate), int(h*compress_rate)))
+        img_byteArr = io.BytesIO()
+        img.save(img_byteArr, format='png')
+        buffer = img_byteArr.getvalue()
+        kb_size = len(buffer) / 1e3
+
+    return buffer

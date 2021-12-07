@@ -1,8 +1,11 @@
 from django.db import transaction
+from django.conf import settings
+
 from rest_framework import viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
+from utils.common import set_uid
 from .models import ZsdxUserManage
 from .serializers import ZsdxUserManageSerializer
 from utils.wx_util import get_openid_session_key_by_code
@@ -23,7 +26,9 @@ class ZsdxUserManageViewSet(viewsets.ModelViewSet):
     def login(self, request):
         js_code = request.data.get('js_code', '')
         # 获取 session_key 和 openid
-        dic_session_key_openid = get_openid_session_key_by_code(js_code)
+        app_id = settings.ZSDX_APP_ID
+        app_secret = settings.ZSDX_APP_SECRET
+        dic_session_key_openid = get_openid_session_key_by_code(js_code, app_id, app_secret)
         session_key = dic_session_key_openid['session_key']
         openid = dic_session_key_openid['openid']
 

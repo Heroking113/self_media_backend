@@ -13,4 +13,5 @@ class ZsdxUserManageSerializer(serializers.ModelSerializer):
         data = super().to_representation(instance)
         data.update(gender=instance.get_gender_display())
         data.update(create_time=str(instance.create_time).split('.')[0])
+        data.update(lasted_time=str(instance.lasted_time).split('.')[0])
         return data

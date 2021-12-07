@@ -1,5 +1,6 @@
 import logging
 import re
+from decimal import Decimal
 
 from .redis_cli import redisCli
 
@@ -35,10 +36,13 @@ def format_bond_manage_ocb_list_ret_data(serializer_data):
         if not cur_bond_price or has_letter(cur_bond_price):
             cur_price = '-'
         else:
-            cur_price = round(float(cur_bond_price), 2)
+            cur_price = float(Decimal(str(round(float(cur_bond_price), 2))))
 
         # 市值
-        market_val = '-' if cur_price == '-' else round(item['hold_num'] * cur_price, 2)
+        if cur_price == '-':
+            market_val = '-'
+        else:
+            market_val = float(Decimal(str(round(item['hold_num'] * cur_price, 2))))
 
         # 今日涨幅 = (现价-昨日收盘价)/昨日收盘价
         yes_close_price = [it['yes_close_price'] for it in convert_data if it['bond_code'] == item['bond_code']][0]
@@ -48,15 +52,26 @@ def format_bond_manage_ocb_list_ret_data(serializer_data):
             today_increase = (float(cur_price) - float(yes_close_price)) / float(yes_close_price)
 
         # 今日盈亏 = 数量*（现价-昨日收盘价）/昨日收盘价 = 数量 * 今日涨幅
-        today_pl = '-' if today_increase == '-' else round(today_increase * item['hold_num'], 2)
+
+        if today_increase == '-':
+            today_pl = '-'
+        else:
+            today_pl = float(Decimal(str(round(item['hold_num'] * today_increase, 2))))
 
         # 持仓占比 = 市值 / 账户资产
-        prop_op = '-' if market_val == '-' else str(round(market_val / account_asset * 100, 2)) + '%'
+        if market_val == '-':
+            prop_op = '-'
+        else:
+            prop_op = str(Decimal(str(round(market_val / account_asset * 100, 2)))) + '%'
+
+        # 单独处理今日涨幅
+        if today_increase != '-':
+            today_increase = str(Decimal(str(round(today_increase*100, 2)))) + '%'
 
         dic.update({
             'market_val': market_val,
             'cur_price': cur_price,
-            'today_increase': today_increase if today_increase == '-' else str(round(today_increase, 4) * 100) + '%',
+            'today_increase': today_increase,
             'today_pl': today_pl,
             'prop_op': prop_op
         })

@@ -7,9 +7,9 @@ from utils.exceptions import GET_SESSION_KEY_OPENID_FAIL_598
 logger = logging.getLogger('cb_backend')
 
 
-def get_openid_session_key_by_code(js_code):
+def get_openid_session_key_by_code(js_code, app_id, app_secret):
 
-    url = 'https://api.weixin.qq.com/sns/jscode2session?appid=' + settings.APP_ID + '&js_code=' + js_code + '&grant_type=authorization_code' + '&secret=' + settings.APP_SECRET
+    url = 'https://api.weixin.qq.com/sns/jscode2session?appid=' + app_id + '&js_code=' + js_code + '&grant_type=authorization_code' + '&secret=' + app_secret
     try:
         response = requests.get(url=url)
     except Exception:

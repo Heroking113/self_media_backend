@@ -8,6 +8,7 @@ from utils.redis_cli import redisCli
 from .models import Configuration
 from apps.bond_manage.models import SelfChooseManage, OwnConvertBond
 from ..base_convert.models import BaseConvert
+from ..base_convert.serializers import BaseConvertSerializer
 
 
 @api_view(['POST'])
@@ -50,6 +51,10 @@ def asset_info(request):
     own_query = list(OwnConvertBond.objects.filter(uid=uid))
     bond_codes = [item.bond_code for item in own_query]
     base_convert = BaseConvert.get_base_convert_in_codes(bond_codes)
+    if not base_convert:
+        base_query = BaseConvert.objects.all()
+        base_serializer = BaseConvertSerializer(base_query, many=True)
+        base_convert = [dict(i) for i in base_serializer.data if i['bond_code'] in bond_codes]
 
     for item in base_convert:
         for oitem in own_query:

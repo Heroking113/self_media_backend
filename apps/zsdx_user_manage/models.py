@@ -12,7 +12,7 @@ class ZsdxUserManage(models.Model):
     nickname = models.CharField(verbose_name='昵称', max_length=64, default='')
     avatar_url = models.TextField(verbose_name='头像地址', default='')
     wechat = models.CharField(verbose_name='微信', max_length=128, default='')
-    phone = models.CharField(verbose_name='手机号', max_length=11, default='')
+    mobile = models.CharField(verbose_name='手机号', max_length=11, default='')
     unionid = models.CharField(max_length=256, verbose_name='unionId', blank=True, null=True)
     openid = models.CharField(max_length=256, verbose_name='openId', blank=True, null=True)
     session_key = models.CharField(max_length=256, verbose_name='session_key', blank=True, null=True)

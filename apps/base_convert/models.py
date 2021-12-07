@@ -100,5 +100,4 @@ class BaseConvert(models.Model):
         base_convert = redisCli.get('base_convert')
         if base_convert:
             return [item for item in base_convert if item['bond_code'] in bond_codes] if bond_codes else base_convert
-        base_convert = list(cls.objects.all())
-        return [dict(i) for i in base_convert if i.bond_code in bond_codes] if bond_codes else [dict(i) for i in base_convert]
+        return None

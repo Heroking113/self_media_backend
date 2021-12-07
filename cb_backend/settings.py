@@ -25,6 +25,9 @@ SECRET_KEY = 'a2nqj%9)l8vbxtry2yfy+zlqlx9e0s#4gm*0u*8$q7d_y2g7zu'
 APP_ID = 'wxe33fc2974499db5f'
 APP_SECRET = '06ed44a39bce2c6fe897f22ef892f5a7'
 
+ZSDX_APP_ID = 'wx52fa1925136733aa'
+ZSDX_APP_SECRET = 'd1bfeb710bd45c9d619fbe2b5454adce'
+
 # SECURITY WARNING: don't run with debug turned on in production!
 # 开发环境：True；生产环境：False
 DEBUG = True
@@ -33,6 +36,8 @@ ENV = 'DEV'
 # ENV = 'PROD'
 
 ALLOWED_HOSTS = ['*']
+
+DOMAIN = 'http://localhost:8008' if ENV == 'DEV' else 'https://www.worldo2o.top'
 
 
 # Application definition

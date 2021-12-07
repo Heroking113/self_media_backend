@@ -26,9 +26,13 @@ class SelfChooseManageViewSet(viewsets.ModelViewSet):
     def list(self, request, *args, **kwargs):
         uid = request.query_params.get('uid', '')
         dic_bond_codes = list(SelfChooseManage.objects.filter(uid=uid).values('bond_code', 'priority'))
+        if not dic_bond_codes:
+            return Response()
+
         bond_codes = [item['bond_code'] for item in dic_bond_codes]
         base_bd_query = BaseConvert.objects.filter(bond_code__in=bond_codes)
         serializer = BaseConvertSerializer(base_bd_query, many=True)
+
 
         if not dic_bond_codes[0]['priority']:
             return Response(serializer.data)
