@@ -25,9 +25,12 @@ class BaseConvertViewSet(viewsets.ModelViewSet):
         return self.get_paginated_response(ret_data)
 
     @action(methods=['GET'], detail=False)
-    def test(self, request):
+    def update_base_convert_save_file(self, request):
         update_base_convert_close_price()
-        return Response({'api url: /bc/test/'})
+        return Response({
+            'api url': '/bc/update_base_convert_save_file/',
+            'status': 'success'
+        })
 
     @action(methods=['GET'], detail=False)
     def cus_inquire(self, request):
