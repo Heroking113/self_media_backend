@@ -1,5 +1,5 @@
 from django.apps import AppConfig
 
 
-class UserManageConfig(AppConfig):
-    name = 'user_manage'
+class ZsdxUserManageConfig(AppConfig):
+    name = 'apps.zsdx_user_manage'

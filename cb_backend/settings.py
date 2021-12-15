@@ -39,6 +39,8 @@ ALLOWED_HOSTS = ['*']
 
 DOMAIN = 'http://localhost:8008' if ENV == 'DEV' else 'https://www.worldo2o.top'
 
+DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
+
 
 # Application definition
 

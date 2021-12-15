@@ -11,7 +11,6 @@ from utils.common import set_uid
 from utils.wx_util import get_openid_session_key_by_code
 from .models import UserManage, AssetManage
 from .serializers import UserManageSerializer, AssetManageSerializer
-from .tasks import statistic_asset_pl
 
 
 class UserManageViewSet(viewsets.ModelViewSet):

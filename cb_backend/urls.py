@@ -14,12 +14,12 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.conf import settings
-from django.conf.urls import url
 from django.contrib import admin
-from django.urls import path, include
+from django.urls import path, include, re_path
 from django.views.static import serve
 
 # 可转债小程序路由
+
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('user/', include('apps.user_manage.urls')),
@@ -40,6 +40,6 @@ urlpatterns += [
 # 开发环境下，通过此配置可获取后台的静态文件；生产环境下用nginx获取静态文件
 if settings.ENV == 'DEV':
     urlpatterns += [
-        url(r'^media/(?P<path>.*)$', serve, {'document_root': settings.MEDIA_ROOT})
+        re_path(r'^media/(?P<path>.*)$', serve, {'document_root': settings.MEDIA_ROOT})
     ]
 
