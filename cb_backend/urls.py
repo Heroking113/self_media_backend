@@ -25,7 +25,8 @@ urlpatterns = [
     path('user/', include('apps.user_manage.urls')),
     path('bc/', include('apps.base_convert.urls')),
     path('bm/', include('apps.bond_manage.urls')),
-    path('cm/', include('apps.common_manage.urls'))
+    path('cm/', include('apps.common_manage.urls')),
+    path('chat/', include('apps.chat.urls'))
 ]
 
 # 中山大学小程序路由

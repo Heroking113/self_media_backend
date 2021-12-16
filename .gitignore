@@ -8,7 +8,8 @@
 
 __pycache__
 
-media
+media/
+static/
 
 # Backup files #
 
@@ -79,6 +80,7 @@ coverage.xml
 
 # pyenv
 
+env/
 .python-version
 
 

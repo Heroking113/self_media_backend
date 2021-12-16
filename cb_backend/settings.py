@@ -59,8 +59,24 @@ INSTALLED_APPS = [
     'apps.zsdx_user_manage',
     'apps.file_manage',
     'apps.idle_manage',
-    'apps.mood_manage'
+    'apps.mood_manage',
 ]
+
+# channels相关
+INSTALLED_APPS += [
+    'channels',
+    'apps.chat'
+]
+# 设置ASGI应用
+ASGI_APPLICATION = 'cb_backend.asgi.application'
+
+# 设置通道层的通信后台 - 本地测试用
+CHANNEL_LAYERS = {
+     "default": {
+         "BACKEND": "channels_redis.core.RedisChannelLayer",
+         'CONFIG': {"hosts": ["redis://127.0.0.1:6379/3"],},
+     },
+ }
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
