@@ -5,7 +5,7 @@ from .views import ImageFileViewSet
 
 
 router = DefaultRouter()
-router.register(r'', ImageFileViewSet)
+router.register(r'img', ImageFileViewSet)
 
 urlpatterns = [
     path('', include(router.urls)),

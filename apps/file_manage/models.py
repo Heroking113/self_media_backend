@@ -6,7 +6,9 @@ class ImageFile(models.Model):
         ('0', 'unknown'),
         ('1', 'idle'),
         ('2', 'mood'),
-        ('3', 'swiper')  # 轮播图长宽比 = 5 : 2
+        ('3', 'swiper'),  # 轮播图长宽比 = 5 : 2
+        ('4', 'confession_wall'),  # 表白墙
+        ('5', 'sell_roommate'),  # 卖室友
     )
 
     inst_type = models.CharField(max_length=4, choices=INST_TYPE, verbose_name='图片类型', default='0', db_index=True)
