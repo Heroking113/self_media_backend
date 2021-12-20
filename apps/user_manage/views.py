@@ -1,3 +1,4 @@
+import base64
 from datetime import timedelta, datetime
 
 from django.conf import settings
@@ -7,10 +8,63 @@ from rest_framework import viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
-from utils.common import set_uid
-from utils.wx_util import get_openid_session_key_by_code
 from .models import UserManage, AssetManage
 from .serializers import UserManageSerializer, AssetManageSerializer
+
+from utils.common import set_uid
+from .models import SchUserManage
+from .serializers import SchUserManageSerializer
+from utils.wx_util import get_openid_session_key_by_code
+
+
+class SchUserManageViewSet(viewsets.ModelViewSet):
+    queryset = SchUserManage.objects.all()
+    serializer_class = SchUserManageSerializer
+    pagination_class = None
+
+    def list(self, request, *args, **kwargs):
+        uid = request.query_params.get('uid', '')
+        query = SchUserManage.objects.filter(uid=uid)
+        serializer = self.get_serializer(query, many=True)
+        return Response(serializer.data)
+
+    @action(methods=['POST'], detail=False)
+    def login(self, request):
+        js_code = request.data.get('js_code', '')
+        school = int(request.data.get('school', 0))
+        SCH_ID_SECRET = settings.SCH_ID_SECRET[school]
+        # 获取 session_key 和 openid
+        app_id = SCH_ID_SECRET['APP_ID']
+        app_secret = SCH_ID_SECRET['APP_SECRET']
+        dic_session_key_openid = get_openid_session_key_by_code(js_code, app_id, app_secret)
+        session_key = dic_session_key_openid['session_key']
+        openid = dic_session_key_openid['openid']
+
+        query = SchUserManage.objects.filter(openid=openid)
+        if query:
+            serializer = self.get_serializer(query[0])
+        else:
+            query = SchUserManage.objects.create(session_key=session_key,
+                                                 openid=openid,
+                                                 school=school,
+                                                 uid=set_uid())
+            serializer = self.get_serializer(query)
+
+        return Response(serializer.data)
+
+    @action(methods=['POST'], detail=False)
+    def update_info(self, request):
+        data = request.data
+        nickname = data.get('nickname', '')
+        nickname_encoder = base64.b64encode(nickname.encode("utf-8"))
+        nickname = nickname_encoder.decode('utf-8')
+        data['nickname'] = nickname
+        uid = data.pop('uid', '')
+        with transaction.atomic():
+            SchUserManage.objects.select_for_update().filter(uid=uid).update(**data)
+        query = SchUserManage.objects.filter(uid=uid)[0]
+        serializer = self.get_serializer(query)
+        return Response(serializer.data)
 
 
 class UserManageViewSet(viewsets.ModelViewSet):
@@ -46,6 +100,10 @@ class UserManageViewSet(viewsets.ModelViewSet):
     @action(methods=['POST'], detail=False)
     def update_info(self, request):
         data = request.data
+        nickname = data.get('nickname', '')
+        nickname_encoder = base64.b64encode(nickname.encode("utf-8"))
+        nickname = nickname_encoder.decode('utf-8')
+        data['nickname'] = nickname
         uid = data.pop('uid', '')
         with transaction.atomic():
             UserManage.objects.select_for_update().filter(uid=uid).update(**data)

@@ -25,8 +25,75 @@ SECRET_KEY = 'a2nqj%9)l8vbxtry2yfy+zlqlx9e0s#4gm*0u*8$q7d_y2g7zu'
 APP_ID = 'wxe33fc2974499db5f'
 APP_SECRET = '06ed44a39bce2c6fe897f22ef892f5a7'
 
-ZSDX_APP_ID = 'wx52fa1925136733aa'
-ZSDX_APP_SECRET = 'd1bfeb710bd45c9d619fbe2b5454adce'
+
+# APP_ID__&__APP_SECRET
+""" 
+    ('0', 'unknown'),
+    ('1', '深圳大学'),
+    ('2', '暨南大学深圳校区'),
+    ('3', '南方科技大学'),
+    ('4', '哈尔滨工业大学'),
+    ('5', '香港中文大学'),
+    ('6', '深圳职业技术学院'),
+    ('7', '深圳信息职业技术学院'),
+    ('8', '中山大学'),
+    ('9', '深圳理工大学'),
+    ('10', '北理莫斯科大学')
+"""
+SCH_ID_SECRET = [
+    {}, # None
+    # 深大
+    {
+        'APP_ID': '',
+        'APP_SECRET': ''
+    },
+    # 深旅
+    {
+        'APP_ID': 'wx5ec552ab899fc7ec',
+        'APP_SECRET': 'f529e0ad26d02e8b5e4f9db1d9ebc7d4'
+    },
+    # 南科大
+    {
+        'APP_ID': '',
+        'APP_SECRET': ''
+    },
+    # 哈工大
+    {
+        'APP_ID': '',
+        'APP_SECRET': ''
+    },
+    # 港中大
+    {
+        'APP_ID': '',
+        'APP_SECRET': ''
+    },
+    # 深职院
+    {
+        'APP_ID': '',
+        'APP_SECRET': ''
+    },
+    # 深信息
+    {
+        'APP_ID': '',
+        'APP_SECRET': ''
+    },
+    # 中大
+    {
+        'APP_ID': '',
+        'APP_SECRET': ''
+    },
+    # 深圳理工
+    {
+        'APP_ID': '',
+        'APP_SECRET': ''
+    },
+    # 北理莫斯科
+    {
+        'APP_ID': '',
+        'APP_SECRET': ''
+    }
+]
+
 
 # SECURITY WARNING: don't run with debug turned on in production!
 # 开发环境：True；生产环境：False
@@ -56,27 +123,26 @@ INSTALLED_APPS = [
     'apps.base_convert',
     'apps.bond_manage',
     'apps.common_manage',
-    'apps.zsdx_user_manage',
     'apps.file_manage',
     'apps.idle_manage',
-    'apps.mood_manage',
+    'apps.topic_manage',
 ]
 
 # channels相关
-INSTALLED_APPS += [
-    'channels',
-    'apps.chat'
-]
-# 设置ASGI应用
-ASGI_APPLICATION = 'cb_backend.asgi.application'
-
-# 设置通道层的通信后台 - 本地测试用
-CHANNEL_LAYERS = {
-     "default": {
-         "BACKEND": "channels_redis.core.RedisChannelLayer",
-         'CONFIG': {"hosts": ["redis://127.0.0.1:6379/3"],},
-     },
- }
+# INSTALLED_APPS += [
+#     'channels',
+#     'apps.chat'
+# ]
+# # 设置ASGI应用
+# ASGI_APPLICATION = 'cb_backend.asgi.application'
+#
+# # 设置通道层的通信后台 - 本地测试用
+# CHANNEL_LAYERS = {
+#      "default": {
+#          "BACKEND": "channels_redis.core.RedisChannelLayer",
+#          'CONFIG': {"hosts": ["redis://127.0.0.1:6379/3"],},
+#      },
+#  }
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -245,7 +311,7 @@ LOGGING = {
         }
     },
     'loggers': {
-        'grape_backend': {
+        'cb_backend': {
             'handlers': ['backend'],
             'level': 'INFO'
         },

@@ -29,12 +29,11 @@ urlpatterns = [
     path('chat/', include('apps.chat.urls'))
 ]
 
-# 中山大学小程序路由
+# 高校小程序路由
 urlpatterns += [
-    path('zsdx/user/', include('apps.zsdx_user_manage.urls')),
-    path('zsdx/idle/', include('apps.idle_manage.urls')),
-    path('zsdx/mood/', include('apps.mood_manage.urls')),
-    path('zsdx/file/', include('apps.file_manage.urls'))
+    path('sch/idle/', include('apps.idle_manage.urls')),
+    path('sch/topic/', include('apps.topic_manage.urls')),
+    path('sch/file/', include('apps.file_manage.urls'))
 ]
 
 

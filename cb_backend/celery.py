@@ -32,6 +32,7 @@ app.autodiscover_tasks()
 - 统计持有总资产：每天15:15统计一遍
 - 统计持有总盈亏：每天15:15统计一遍
 - 统计每支可转债盈亏：每天15:15统计一遍
+- 每小时更新一次access_token
 
 """
 # 允许root 用户运行celery
@@ -59,6 +60,10 @@ app.conf.update(
         'statistic_day_bond_pl': {
             'task': 'apps.bond_manage.tasks.statistic_day_bond_pl',
             'schedule': crontab(minute=15, hour=15)
+        },
+        'fetch_access_token': {
+            'task': 'apps.common_manage.tasks.fetch_access_token',
+            'schedule': crontab(minute=0, hour='*')
         }
     }
 )

@@ -1,9 +1,13 @@
 import random
+import smtplib
 import string
 import time
 import os
 import logging
 from datetime import timedelta, datetime
+from email.mime.text import MIMEText
+
+from datetime import datetime, timedelta
 
 import pandas as pd
 import akshare as ak
@@ -149,3 +153,40 @@ def change_img_size(file_path, compress_rate=0.6):
         kb_size = len(buffer) / 1e3
 
     return buffer
+
+
+def send_email(title, content):
+    receivers = ['1819785416@qq.com']  # 保存你要发送的人的邮箱号
+    sender = "shshli888@sina.com"  # 自己发送邮箱的号
+    sender_pwd = "a96b52da80e119f0"  # 开通smtp俯卧的时候回得到一个随机码，注意！不是QQ密码
+    receiver_remind = "1819785416@qq.com"  # 这个是指在邮件的开头部分告知本邮件的收件人是谁
+    msg = MIMEText(content, _subtype='plain', _charset='gb2312')  # 将邮件正文以及字体加载到msg这个载体中
+    msg["Subject"] = title  # 加载标题
+    msg["From"] = sender  # 加载发送人
+    msg["To"] = receiver_remind  # 加载收件人
+
+    try:
+        s = smtplib.SMTP_SSL("smtp.sina.com", 465)  # 邮箱服务器的地址和端口号，需要SSL验证
+        s.login(sender, sender_pwd)  # 验证账号和随机码
+        for each in range(0, len(receivers)):  # 对所有在list里面的用户发送邮件
+            s.sendmail(sender, receivers[each], msg.as_string())
+        s.quit()
+    except Exception:
+        logger.error('发送邮件失败, 邮件标题为:{title}, 邮件内容为:{content}'.format(title=title, content=content))
+
+
+def format_datetime(date_time):
+    now = datetime.now()
+    zeroToday = now - timedelta(hours=now.hour, minutes=now.minute, seconds=now.second,
+                                         microseconds=now.microsecond)
+    zeroYesterday = zeroToday - timedelta(hours=23, minutes=59, seconds=60)
+    if date_time >= zeroToday:
+        return date_time.strftime('%H:%M')
+    elif date_time >= zeroYesterday:
+        return date_time.strftime('昨天 %H:%M')
+    else:
+        year = int(date_time.strftime('%Y'))
+        cur_year = int(datetime.today().year)
+        if year == cur_year:
+            return date_time.strftime('%m-%d %H:%M')
+        return date_time.strftime('%y-%m-%d %H:%M')

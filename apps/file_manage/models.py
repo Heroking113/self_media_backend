@@ -4,15 +4,30 @@ class ImageFile(models.Model):
 
     INST_TYPE = (
         ('0', 'unknown'),
-        ('1', 'idle'),
-        ('2', 'mood'),
-        ('3', 'swiper'),  # 轮播图长宽比 = 5 : 2
-        ('4', 'confession_wall'),  # 表白墙
-        ('5', 'sell_roommate'),  # 卖室友
+        ('1', 'swiper'),  # 轮播图长宽比 = 5 : 2
+        ('2', 'topic'), # 树洞 / 表白墙 / 卖舍友
+        ('3', 'idle'),
+        ('6', 'server_qr')
+    )
+
+    SCHOOL = (
+        ('0', 'unknown'),
+        ('1', '深圳大学'),
+        ('2', '暨南大学深圳校区'),
+        ('3', '南方科技大学'),
+        ('4', '哈尔滨工业大学'),
+        ('5', '香港中文大学'),
+        ('6', '深圳职业技术学院'),
+        ('7', '深圳信息职业技术学院'),
+        ('8', '中山大学'),
+        ('9', '深圳理工大学'),
+        ('10', '北理莫斯科大学')
     )
 
     inst_type = models.CharField(max_length=4, choices=INST_TYPE, verbose_name='图片类型', default='0', db_index=True)
     inst_id = models.IntegerField(verbose_name='类型实例ID', default=0)
+    school = models.CharField(verbose_name='学校', max_length=8, default='0', choices=SCHOOL, null=True, blank=True,
+                              db_index=True)
     file_path = models.FileField(upload_to='photos/', verbose_name='图片', help_text='图片（ImageField）', null=True, blank=True)
     create_time = models.DateTimeField(verbose_name='创建时间', help_text='创建时间（DateTimeField）',auto_now_add=True, null=True, blank=True)
     is_deleted = models.BooleanField(verbose_name='是否删除', help_text='是否删除', default=False)

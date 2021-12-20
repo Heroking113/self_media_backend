@@ -28,3 +28,7 @@ class DataPageNumberPagination(PageNumberPagination):
 
 class CommentMsgPagination(DataPageNumberPagination):
     page_size = 25
+
+
+class TopicPagination(DataPageNumberPagination):
+    page_size = 10

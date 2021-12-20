@@ -1,14 +1,28 @@
+import logging
 import re
 
 from django.db.models import Q
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 
+from utils.common import send_email
 from utils.redis_cli import redisCli
 from .models import Configuration
 from apps.bond_manage.models import SelfChooseManage, OwnConvertBond
+from .tasks import fetch_access_token
 from ..base_convert.models import BaseConvert
 from ..base_convert.serializers import BaseConvertSerializer
+
+logger = logging.getLogger('cb_backend')
+
+
+@api_view(['GET'])
+def test(request):
+    # access_token = fetch_access_token()
+    # send_email('title', 'content')
+    # logger.error('heroking')
+
+    return Response()
 
 
 @api_view(['POST'])
