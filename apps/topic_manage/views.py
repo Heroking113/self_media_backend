@@ -1,5 +1,6 @@
 import base64
 import os
+from random import randint
 
 from django.conf import settings
 from django.db import transaction
@@ -11,6 +12,7 @@ from rest_framework.response import Response
 from utils.pagination import CommentMsgPagination, TopicPagination
 from .models import TopicManage, CommentManage
 from .serializers import TopicManageSerializer, CommentManageSerializer
+from ..common_manage.models import Configuration
 from ..file_manage.models import ImageFile
 
 
@@ -18,6 +20,30 @@ class TopicManageViewSet(viewsets.ModelViewSet):
     queryset = TopicManage.objects.filter(is_deleted=False).order_by('-create_time')
     serializer_class = TopicManageSerializer
     pagination_class = TopicPagination
+
+    # @action(methods=['GET'], detail=False)
+    # def tmp(self, request):
+    #     """
+    #         更新帖子的用户昵称和头像
+    #     """
+    #     nickname_list = Configuration.objects.get(key='nickname_list').uni_val
+    #     nickname_list = nickname_list.split(',')
+    #
+    #     root_path = '/Users/heroking/Documents/convertible_bond/cb_backend/media/tmp_avatars/'
+    #     files = os.listdir(root_path)
+    #
+    #     ids = [i[0] for i in TopicManage.objects.values_list('id')]
+    #     with transaction.atomic():
+    #         for id in ids:
+    #             nick_index = randint(0, len(nickname_list) - 1)
+    #             file_index = randint(0, len(files) - 1)
+    #             nickname = nickname_list[nick_index]
+    #             nickname_encoder = base64.b64encode(nickname.encode("utf-8"))
+    #             nickname = nickname_encoder.decode('utf-8')
+    #             avatar_url = 'tmp_avatars/' + files[file_index]
+    #             TopicManage.objects.select_for_update().filter(id=id).update(nickname=nickname, avatar_url=avatar_url)
+    #
+    #     return Response()
 
     def create(self, request, *args, **kwargs):
         data = request.data

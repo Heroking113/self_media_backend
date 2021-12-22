@@ -10,8 +10,8 @@ class ImageFileAdmin(admin.ModelAdmin):
                     'inst_type',
                     'inst_id',
                     'file_path',
-                    'create_time',
-                    'is_deleted')
+                    'is_deleted',
+                    'create_time')
 
     list_editable = ('is_deleted',)
 

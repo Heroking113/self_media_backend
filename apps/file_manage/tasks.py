@@ -1,10 +1,7 @@
 import json
 
 from celery import shared_task
-from django.db import transaction
 
-from apps.topic_manage.models import TopicManage, CommentManage
-from apps.user_manage.models import SchUserManage
 from utils.common import change_img_size
 from utils.wx_util import wx_img_sec_check
 

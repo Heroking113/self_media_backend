@@ -13,7 +13,6 @@ from .tasks import async_img_sec_check
 from ..idle_manage.models import IdleManage
 from ..topic_manage.models import TopicManage
 from ..common_manage.tasks import update_user_profile
-from ..user_manage.models import SchUserManage
 
 
 class ImageFileSerializer(serializers.ModelSerializer):
@@ -21,12 +20,6 @@ class ImageFileSerializer(serializers.ModelSerializer):
     class Meta:
         model = ImageFile
         fields = '__all__'
-
-    # def to_representation(self, instance):
-    #     data = super().to_representation(instance)
-    #     data.update(inst_type=instance.get_inst_type_display())
-    #     data.update(create_time=str(instance.create_time).split('.')[0])
-    #     return data
 
     # 字段校验
     imgs = serializers.ListField(

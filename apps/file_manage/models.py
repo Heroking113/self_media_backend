@@ -12,7 +12,6 @@ class ImageFile(models.Model):
         ('2', 'topic'), # 树洞 / 表白墙 / 卖舍友
         ('3', 'idle'),
         ('4', 'avatar'),
-        ('6', 'server_qr'),
     )
 
     SCHOOL = (

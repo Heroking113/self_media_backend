@@ -27,3 +27,4 @@ class SchSwiperAdmin(admin.ModelAdmin):
     list_display = ('id', 'school', 'swiper_type', 'img_path', 'mp_id', 'tweets_url')
     list_editable = ('school', 'swiper_type', 'img_path', 'mp_id', 'tweets_url')
     list_per_page = 100
+    list_filter = ('school', 'swiper_type')

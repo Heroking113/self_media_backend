@@ -4,7 +4,6 @@ import string
 import time
 import os
 import logging
-from datetime import timedelta, datetime
 from email.mime.text import MIMEText
 
 from datetime import datetime, timedelta
