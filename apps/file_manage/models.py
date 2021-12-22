@@ -9,7 +9,6 @@ class ImageFile(models.Model):
 
     INST_TYPE = (
         ('0', 'unknown'),
-        ('1', 'swiper'),  # 轮播图长宽比 = 5 : 2
         ('2', 'topic'), # 树洞 / 表白墙 / 卖舍友
         ('3', 'idle'),
         ('4', 'avatar'),

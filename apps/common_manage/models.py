@@ -21,6 +21,7 @@ class Configuration(models.Model):
 
 
 class SchSwiper(models.Model):
+    """  轮播图长宽比 = 5 : 2  """
     SCHOOL = (
         ('0', 'unknown'),
         ('1', '深圳大学'),
