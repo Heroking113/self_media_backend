@@ -1,16 +1,19 @@
 import json
+import os
 from datetime import datetime
 from random import randint
 
 from django.conf import settings
 from django.db import transaction
+from django.db.models import Q
 from rest_framework import serializers
 
 from .models import ImageFile
 from .tasks import async_img_sec_check
 from ..idle_manage.models import IdleManage
 from ..topic_manage.models import TopicManage
-
+from ..common_manage.tasks import update_user_profile
+from ..user_manage.models import SchUserManage
 
 
 class ImageFileSerializer(serializers.ModelSerializer):
@@ -35,8 +38,18 @@ class ImageFileSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         imgs = validated_data.get('imgs')
         inst_type = self.initial_data.get('inst_type', '0')
-        inst_id = int(self.initial_data.get('inst_id', 0))
+        inst_id = self.initial_data.get('inst_id', '0')
         school = self.initial_data.get('school', '0')
+
+        if inst_type == '4':
+            with transaction.atomic():
+                pre_query = ImageFile.objects.select_for_update().filter(Q(inst_id=inst_id)
+                                                                         & Q(inst_type=inst_type)
+                                                                         & Q(school=school))
+                if pre_query:
+                    for item in pre_query:
+                        os.remove(settings.MEDIA_ROOT + '/' + item.file_path.name)
+                    pre_query.delete()
 
         img_list = []
         li_params = []
@@ -50,8 +63,9 @@ class ImageFileSerializer(serializers.ModelSerializer):
                 school=school
             ))
             # 检测图片
+            now_date = datetime.now().strftime('%Y-%m-%d')
             li_params.append({
-                'file_path': str(settings.BASE_DIR) + '/media/photos/' + url.name,
+                'file_path': str(settings.MEDIA_ROOT) + '/photos/' + now_date + '/' + url.name,
                 'inst_type': inst_type,
                 'inst_id': inst_id,
                 'school': school
@@ -73,6 +87,15 @@ class ImageFileSerializer(serializers.ModelSerializer):
                     [item.file_path.name for item in ret]) if base_img_paths else ','.join(
                     [item.file_path.name for item in ret])
                 IdleManage.objects.select_for_update().filter(id=inst_id).update(img_paths=img_paths)
+
+        if inst_type == '4':
+            # avatar
+            user_profile = {
+                'avatar_url': ret[0].file_path.name,
+                'uid': inst_id,
+                'school': school
+            }
+            update_user_profile.delay(user_profile)
         # 图片违规检测
         async_img_sec_check.delay(json.dumps(li_params))
 

@@ -1,4 +1,9 @@
+from datetime import datetime
+
 from django.db import models
+
+from utils.common import upload_path_handler
+
 
 class ImageFile(models.Model):
 
@@ -7,7 +12,8 @@ class ImageFile(models.Model):
         ('1', 'swiper'),  # 轮播图长宽比 = 5 : 2
         ('2', 'topic'), # 树洞 / 表白墙 / 卖舍友
         ('3', 'idle'),
-        ('6', 'server_qr')
+        ('4', 'avatar'),
+        ('6', 'server_qr'),
     )
 
     SCHOOL = (
@@ -25,10 +31,10 @@ class ImageFile(models.Model):
     )
 
     inst_type = models.CharField(max_length=4, choices=INST_TYPE, verbose_name='图片类型', default='0', db_index=True)
-    inst_id = models.IntegerField(verbose_name='类型实例ID', default=0)
+    inst_id = models.CharField(verbose_name='类型实例ID', default='0', max_length=128)
     school = models.CharField(verbose_name='学校', max_length=8, default='0', choices=SCHOOL, null=True, blank=True,
                               db_index=True)
-    file_path = models.FileField(upload_to='photos/', verbose_name='图片', help_text='图片（ImageField）', null=True, blank=True)
+    file_path = models.FileField(upload_to=upload_path_handler(), verbose_name='图片', help_text='图片（ImageField）', null=True, blank=True)
     create_time = models.DateTimeField(verbose_name='创建时间', help_text='创建时间（DateTimeField）',auto_now_add=True, null=True, blank=True)
     is_deleted = models.BooleanField(verbose_name='是否删除', help_text='是否删除', default=False)
 

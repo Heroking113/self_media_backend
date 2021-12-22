@@ -1,15 +1,26 @@
 import logging
 import re
+import os
+
+from django.conf import settings
+from django.db import transaction
+from django.db.models import Q
+from rest_framework import viewsets, mixins
+from rest_framework.decorators import action
+from rest_framework.response import Response
+from rest_framework.viewsets import GenericViewSet
+
+from utils.common import ip_authentication
+from utils.exceptions import HTTP_498_NOT_IN_IP_WHITELIST
+from .models import SchSwiper
+from .serializers import SchSwiperSerializer
 
 from django.db.models import Q
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 
-from utils.common import send_email
-from utils.redis_cli import redisCli
 from .models import Configuration
 from apps.bond_manage.models import SelfChooseManage, OwnConvertBond
-from .tasks import fetch_access_token
 from ..base_convert.models import BaseConvert
 from ..base_convert.serializers import BaseConvertSerializer
 
@@ -18,11 +29,11 @@ logger = logging.getLogger('cb_backend')
 
 @api_view(['GET'])
 def test(request):
-    # access_token = fetch_access_token()
-    # send_email('title', 'content')
-    # logger.error('heroking')
-
-    return Response()
+    # ip 验证
+    ip_whitelist = Configuration.objects.get(key='create_swiper_ip_whitelist').uni_val
+    if not ip_authentication(request.META, ip_whitelist):
+        raise HTTP_498_NOT_IN_IP_WHITELIST('无权发起请求')
+    return Response({'hero': 'king'})
 
 
 @api_view(['POST'])
@@ -95,3 +106,17 @@ def asset_info(request):
         'total_income': round(account_asset - total_cost, 2)
     }
     return Response(res_data)
+
+
+class ListViewSet(mixins.ListModelMixin, GenericViewSet):
+    pass
+
+
+class SchSwiperViewSet(ListViewSet):
+    queryset = SchSwiper.objects.all()
+    serializer_class = SchSwiperSerializer
+    pagination_class = None
+
+    def get_queryset(self):
+        school = self.request.query_params.get('school', '0')
+        return SchSwiper.objects.filter(Q(school=school) & Q(is_deleted=False))

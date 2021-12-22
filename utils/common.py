@@ -190,3 +190,18 @@ def format_datetime(date_time):
         if year == cur_year:
             return date_time.strftime('%m-%d %H:%M')
         return date_time.strftime('%y-%m-%d %H:%M')
+
+
+def upload_path_handler():
+    now_date = datetime.now().strftime('%Y-%m-%d')
+    return "photos/{time}".format(time=now_date)
+
+
+def ip_authentication(request_meta, ip_whitelist):
+    ip = request_meta.get("HTTP_X_FORWARDED_FOR", "")
+    if not ip:
+        ip = request_meta.get('REMOTE_ADDR', "")
+    client_ip = ip.split(",")[-1].strip() if ip else ""
+    if client_ip in ip_whitelist:
+        return True
+    return False

@@ -47,11 +47,6 @@ class AssetManage(models.Model):
 
 # Create your models here.
 class SchUserManage(models.Model):
-    GENDER = (
-        ('0', 'unknown'),
-        ('1', '男'),
-        ('2', '女')
-    )
 
     SCHOOL = (
         ('0', 'unknown'),
@@ -76,9 +71,6 @@ class SchUserManage(models.Model):
     unionid = models.CharField(max_length=256, verbose_name='unionId', blank=True, null=True)
     openid = models.CharField(max_length=256, verbose_name='openId', blank=True, null=True)
     session_key = models.CharField(max_length=256, verbose_name='session_key', blank=True, null=True)
-    gender = models.CharField(verbose_name='性别', max_length=16, choices=GENDER, default='0')
-    city = models.CharField(max_length=64, verbose_name='城市', blank=True, null=True)
-    province = models.CharField(max_length=64, verbose_name='省份', blank=True, null=True)
     create_time = models.DateTimeField(auto_now_add=True, verbose_name='创建时间')
     lasted_time = models.DateTimeField(auto_now=True, verbose_name='更新时间')
 

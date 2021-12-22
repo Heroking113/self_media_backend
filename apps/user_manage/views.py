@@ -14,6 +14,7 @@ from .serializers import UserManageSerializer, AssetManageSerializer
 from utils.common import set_uid
 from .models import SchUserManage
 from .serializers import SchUserManageSerializer
+from ..common_manage.tasks import update_user_profile
 from utils.wx_util import get_openid_session_key_by_code
 
 
@@ -53,18 +54,26 @@ class SchUserManageViewSet(viewsets.ModelViewSet):
         return Response(serializer.data)
 
     @action(methods=['POST'], detail=False)
-    def update_info(self, request):
+    def update_profile(self, request):
         data = request.data
         nickname = data.get('nickname', '')
+        if not nickname:
+            queryset = SchUserManage.objects.get(uid=data['uid'])
+            serializer = self.get_serializer(queryset)
+            return Response(serializer.data)
+
         nickname_encoder = base64.b64encode(nickname.encode("utf-8"))
         nickname = nickname_encoder.decode('utf-8')
         data['nickname'] = nickname
-        uid = data.pop('uid', '')
+        update_data = {'nickname': nickname}
+        if 'avatar_url' in data:
+            update_data['avatar_url'] = data['avatar_url']
         with transaction.atomic():
-            SchUserManage.objects.select_for_update().filter(uid=uid).update(**data)
-        query = SchUserManage.objects.filter(uid=uid)[0]
-        serializer = self.get_serializer(query)
-        return Response(serializer.data)
+            SchUserManage.objects.select_for_update().filter(uid=data['uid']).update(**update_data)
+            update_user_profile.delay(data, is_update_userprofile=False)
+            queryset = SchUserManage.objects.get(uid=data['uid'])
+            serializer = self.get_serializer(queryset)
+            return Response(serializer.data)
 
 
 class UserManageViewSet(viewsets.ModelViewSet):

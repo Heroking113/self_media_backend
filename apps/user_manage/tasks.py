@@ -59,6 +59,3 @@ def statistic_asset_pl():
 
 
 
-
-
-

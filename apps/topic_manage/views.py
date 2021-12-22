@@ -88,6 +88,23 @@ class CommentViewSet(viewsets.ModelViewSet):
         inst_id = int(self.request.query_params.get('inst_id', 0))
         return CommentManage.objects.filter(Q(inst_id=inst_id) & Q(is_deleted=False))
 
+    def create(self, request, *args, **kwargs):
+        data = request.data
+        nickname = data.get('nickname', '')
+        nickname_encoder = base64.b64encode(nickname.encode("utf-8"))
+        nickname = nickname_encoder.decode('utf-8')
+        data['nickname'] = nickname
+        if data.get('is_sec_comment', False):
+            fir_comment_nickname = data['fir_comment_nickname']
+            fir_comment_nickname_encoder = base64.b64encode(fir_comment_nickname.encode('utf-8'))
+            fir_comment_nickname = fir_comment_nickname_encoder.decode('utf-8')
+            data['fir_comment_nickname'] = fir_comment_nickname
+        serializer = self.get_serializer(data=data)
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
+        headers = self.get_success_headers(serializer.data)
+        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+
     @action(methods=['GET'], detail=False)
     def person_comment_data(self, request):
         uid = request.query_params.get('uid', '')

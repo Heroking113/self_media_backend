@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import Configuration
+from .models import Configuration, SchSwiper
 
 
 @admin.register(Configuration)
@@ -19,4 +19,11 @@ class ConfigurationAdmin(admin.ModelAdmin):
 
     # readonly_fields = ('key',)
 
+    list_per_page = 100
+
+
+@admin.register(SchSwiper)
+class SchSwiperAdmin(admin.ModelAdmin):
+    list_display = ('id', 'school', 'swiper_type', 'img_path', 'mp_id', 'tweets_url')
+    list_editable = ('school', 'swiper_type', 'img_path', 'mp_id', 'tweets_url')
     list_per_page = 100

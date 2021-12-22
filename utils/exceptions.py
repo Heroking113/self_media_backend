@@ -12,3 +12,7 @@ class GET_SESSION_KEY_OPENID_FAIL_598(APIException):
 
 class HTTP_499_DATA_EXIST(APIException):
     status_code = 499
+
+
+class HTTP_498_NOT_IN_IP_WHITELIST(APIException):
+    status_code = 498

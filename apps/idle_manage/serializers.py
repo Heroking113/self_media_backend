@@ -1,6 +1,7 @@
 from rest_framework import serializers
 from django.conf import settings
 
+from utils.common import format_datetime
 from .models import IdleManage
 
 MEDIA_PATH = settings.DOMAIN + '/media/'
@@ -16,14 +17,7 @@ class IdleManageSerializer(serializers.ModelSerializer):
         data = super().to_representation(instance)
         data.update(order_status=instance.get_order_status_display())
 
-        create_time = str(instance.create_time).split('.')[0]
-        y_m_d, h_m_s = create_time.split(' ')
-        _, m, d = y_m_d.split('-')
-        m_d = '-'.join([m, d])
-        h, mm, _ = h_m_s.split(':')
-        h_m = ':'.join([h, mm])
-        create_time = ' '.join([m_d, h_m])
-        # data.update(create_time=str(instance.create_time).split(' ')[0])
+        create_time = format_datetime(instance.create_time)
         data.update(create_time=create_time)
 
         img_paths = instance.img_paths.split(',')
