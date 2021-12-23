@@ -24,7 +24,7 @@ class TopicManageViewSet(viewsets.ModelViewSet):
     serializer_class = TopicManageSerializer
     pagination_class = TopicPagination
 
-    # @action(methods=['GET'], detail=False)
+    # @action(methods=['POST'], detail=False)
     # def fast_bulk_create(self, request):
     #     """
     #     快速将测试数据复制到别的学校
@@ -84,29 +84,29 @@ class TopicManageViewSet(viewsets.ModelViewSet):
     #     return time.strftime(frmt, time.localtime(self.strTimeProp(start, end, random(), frmt)))
 
 
-    # @action(methods=['GET'], detail=False)
-    # def tmp(self, request):
-    #     """
-    #         更新帖子的用户昵称和头像
-    #     """
-    #     nickname_list = Configuration.objects.get(key='nickname_list').uni_val
-    #     nickname_list = nickname_list.split(',')
-    #
-    #     root_path = '/Users/heroking/Documents/convertible_bond/cb_backend/media/tmp_avatars/'
-    #     files = os.listdir(root_path)
-    #
-    #     ids = [i[0] for i in TopicManage.objects.values_list('id')]
-    #     with transaction.atomic():
-    #         for id in ids:
-    #             nick_index = randint(0, len(nickname_list) - 1)
-    #             file_index = randint(0, len(files) - 1)
-    #             nickname = nickname_list[nick_index]
-    #             nickname_encoder = base64.b64encode(nickname.encode("utf-8"))
-    #             nickname = nickname_encoder.decode('utf-8')
-    #             avatar_url = 'tmp_avatars/' + files[file_index]
-    #             TopicManage.objects.select_for_update().filter(id=id).update(nickname=nickname, avatar_url=avatar_url)
-    #
-    #     return Response()
+    @action(methods=['POST'], detail=False)
+    def bulk_update_user_profile(self, request):
+        """
+            更新帖子的用户昵称和头像
+        """
+        nickname_list = Configuration.objects.get(key='nickname_list').uni_val
+        nickname_list = nickname_list.split(',')
+
+        root_path = '/Users/heroking/Documents/convertible_bond/cb_backend/media/tmp_avatars/'
+        files = os.listdir(root_path)
+
+        ids = [i[0] for i in TopicManage.objects.filter(school='3').values_list('id')]
+        with transaction.atomic():
+            for id in ids:
+                nick_index = randint(0, len(nickname_list) - 1)
+                file_index = randint(0, len(files) - 1)
+                nickname = nickname_list[nick_index]
+                nickname_encoder = base64.b64encode(nickname.encode("utf-8"))
+                nickname = nickname_encoder.decode('utf-8')
+                avatar_url = 'tmp_avatars/' + files[file_index]
+                TopicManage.objects.select_for_update().filter(id=id).update(nickname=nickname, avatar_url=avatar_url)
+
+        return Response()
 
     def create(self, request, *args, **kwargs):
         data = request.data
