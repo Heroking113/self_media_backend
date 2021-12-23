@@ -38,7 +38,8 @@ APP_SECRET = '06ed44a39bce2c6fe897f22ef892f5a7'
     ('7', '深圳信息职业技术学院'),
     ('8', '中山大学'),
     ('9', '深圳理工大学'),
-    ('10', '北理莫斯科大学')
+    ('10', '北理莫斯科大学'),
+    ('11', '深圳技师学院')
 """
 SCH_ID_SECRET = [
     {}, # None
@@ -54,8 +55,8 @@ SCH_ID_SECRET = [
     },
     # 南科大
     {
-        'APP_ID': '',
-        'APP_SECRET': ''
+        'APP_ID': 'wx1f4d15b22dad4413',
+        'APP_SECRET': '5214c49e9b2c445845b10bd144c8b50d'
     },
     # 哈工大
     {
@@ -74,8 +75,8 @@ SCH_ID_SECRET = [
     },
     # 深信息
     {
-        'APP_ID': '',
-        'APP_SECRET': ''
+        'APP_ID': 'wx5356c44b7996f1a7',
+        'APP_SECRET': '2714ecae5015bb9772d699a3a837c49d'
     },
     # 中大
     {
@@ -91,6 +92,11 @@ SCH_ID_SECRET = [
     {
         'APP_ID': '',
         'APP_SECRET': ''
+    },
+    # 深技师
+    {
+        'APP_ID': 'wxe5270890fa80d028',
+        'APP_SECRET': '0dfd476f2e8b128928d054488bcf2e27'
     }
 ]
 

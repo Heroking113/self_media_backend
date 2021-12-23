@@ -23,7 +23,8 @@ class TopicManage(models.Model):
         ('7', '深圳信息职业技术学院'),
         ('8', '中山大学'),
         ('9', '深圳理工大学'),
-        ('10', '北理莫斯科大学')
+        ('10', '北理莫斯科大学'),
+        ('11', '深圳技师学院')
     )
 
     uid = models.CharField(verbose_name='用户对外ID', max_length=16, default='')
@@ -36,7 +37,7 @@ class TopicManage(models.Model):
     view_count = models.IntegerField(verbose_name='浏览量', default=0)
     is_deleted = models.BooleanField(verbose_name='是否删除', default=False)
     img_paths = models.TextField(verbose_name='图片路由', default='')
-    create_time = models.DateTimeField(verbose_name='创建的时间', help_text='创建的时间', auto_now_add=True)
+    create_time = models.DateTimeField(verbose_name='创建的时间', help_text='创建的时间', default=timezone.now)
 
     class Meta:
         db_table = 'topic_manage'

@@ -9,6 +9,7 @@ class TopicManageAdmin(admin.ModelAdmin):
     list_per_page = 50
     list_editable = ('topic_type', 'is_deleted', 'title', 'content')
     list_filter = ('school', 'topic_type')
+    search_fields = ('title', 'content')
 
 
 @admin.register(CommentManage)

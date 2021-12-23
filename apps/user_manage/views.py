@@ -41,7 +41,7 @@ class SchUserManageViewSet(viewsets.ModelViewSet):
         session_key = dic_session_key_openid['session_key']
         openid = dic_session_key_openid['openid']
 
-        query = SchUserManage.objects.filter(openid=openid)
+        query = SchUserManage.objects.filter(Q(openid=openid) & Q(school=school))
         if query:
             serializer = self.get_serializer(query[0])
         else:

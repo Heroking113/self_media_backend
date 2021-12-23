@@ -21,7 +21,7 @@ from django.views.static import serve
 # 可转债小程序路由
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
+    path('admin_super_server/', admin.site.urls),
     path('user/', include('apps.user_manage.urls')),
     path('bc/', include('apps.base_convert.urls')),
     path('bm/', include('apps.bond_manage.urls')),

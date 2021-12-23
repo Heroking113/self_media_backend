@@ -25,7 +25,8 @@ class ImageFile(models.Model):
         ('7', '深圳信息职业技术学院'),
         ('8', '中山大学'),
         ('9', '深圳理工大学'),
-        ('10', '北理莫斯科大学')
+        ('10', '北理莫斯科大学'),
+        ('11', '深圳技师学院')
     )
 
     inst_type = models.CharField(max_length=4, choices=INST_TYPE, verbose_name='图片类型', default='0', db_index=True)

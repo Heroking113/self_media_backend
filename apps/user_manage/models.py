@@ -59,7 +59,8 @@ class SchUserManage(models.Model):
         ('7', '深圳信息职业技术学院'),
         ('8', '中山大学'),
         ('9', '深圳理工大学'),
-        ('10', '北理莫斯科大学')
+        ('10', '北理莫斯科大学'),
+        ('11', '深圳技师学院')
     )
 
     uid = models.CharField(verbose_name='用户对外ID', max_length=16, default='')

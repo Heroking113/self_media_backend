@@ -1,6 +1,9 @@
 import base64
 import os
-from random import randint
+import shutil
+from datetime import datetime
+import time
+from random import randint, random
 
 from django.conf import settings
 from django.db import transaction
@@ -20,6 +23,66 @@ class TopicManageViewSet(viewsets.ModelViewSet):
     queryset = TopicManage.objects.filter(is_deleted=False).order_by('-create_time')
     serializer_class = TopicManageSerializer
     pagination_class = TopicPagination
+
+    # @action(methods=['GET'], detail=False)
+    # def fast_bulk_create(self, request):
+    #     """
+    #     快速将测试数据复制到别的学校
+    #     """
+    #     MEDIA_ROOT = '/Users/heroking/Documents/convertible_bond/cb_backend/media/'
+    #     TAR_PATH = '/Users/heroking/Documents/convertible_bond/cb_backend/media/photos/2021-12-24/'
+    #     start_time = '2021-12-24 08:00:00'
+    #     end_time = '2021-12-25 02:00:00'
+    #     nickname_list = Configuration.objects.get(key='nickname_list').uni_val
+    #     nickname_list = nickname_list.split(',')
+    #     root_path = '/Users/heroking/Documents/convertible_bond/cb_backend/media/tmp_avatars/'
+    #     files = os.listdir(root_path)
+    #
+    #     base_school_2_query = list(TopicManage.objects.filter(school='2'))
+    #     create_data = []
+    #     for bi in base_school_2_query:
+    #         tmp_img_paths = bi.img_paths.split(',') if bi.img_paths else ''
+    #         t_img_paths = []
+    #         for ii in tmp_img_paths:
+    #             if not ii:
+    #                 break
+    #             ini_img = MEDIA_ROOT + ii
+    #             img_name = '{0:%Y%m%d%H%M%S%f}'.format(datetime.now()) + str(randint(1000000, 9999999)) + '.jpg'
+    #             tar_img = TAR_PATH + img_name
+    #             shutil.copyfile(ini_img, tar_img)
+    #             t_img_paths.append('photos/2021-12-24/'+img_name)
+    #
+    #         nick_index = randint(0, len(nickname_list) - 1)
+    #         file_index = randint(0, len(files) - 1)
+    #         nickname = nickname_list[nick_index]
+    #         nickname_encoder = base64.b64encode(nickname.encode("utf-8"))
+    #         nickname = nickname_encoder.decode('utf-8')
+    #         avatar_url = 'tmp_avatars/' + files[file_index]
+    #         create_data.append(TopicManage(
+    #             uid='37jfx3o6y27',
+    #             nickname=nickname,
+    #             avatar_url=avatar_url,
+    #             title=bi.title,
+    #             content=bi.content,
+    #             topic_type=bi.topic_type,
+    #             school='7',
+    #             view_count=bi.view_count,
+    #             img_paths=','.join(t_img_paths),
+    #             create_time=self.randomDate(start_time, end_time)
+    #         ))
+    #
+    #     TopicManage.objects.bulk_create(create_data)
+    #     return Response()
+
+    # def strTimeProp(self, start, end, prop, frmt):
+    #     stime = time.mktime(time.strptime(start, frmt))
+    #     etime = time.mktime(time.strptime(end, frmt))
+    #     ptime = stime + prop * (etime - stime)
+    #     return int(ptime)
+    #
+    # def randomDate(self, start, end, frmt='%Y-%m-%d %H:%M:%S'):
+    #     return time.strftime(frmt, time.localtime(self.strTimeProp(start, end, random(), frmt)))
+
 
     # @action(methods=['GET'], detail=False)
     # def tmp(self, request):
