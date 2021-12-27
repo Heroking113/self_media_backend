@@ -43,8 +43,9 @@ def get_single_news(media_id, access_token):
 
 if __name__ == '__main__':
     # access_token = get_access_token()
-    content = get_sucai(access_token)
-    for item in content['item']:
-        ret = get_single_news(item['media_id'], access_token)
-        print(item['url'])
+    # content = get_sucai(access_token)
+    # for item in content['item']:
+    #     ret = get_single_news(item['media_id'], access_token)
+    #     print(item['url'])
+    print('main')
 

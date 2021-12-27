@@ -35,6 +35,7 @@ class TopicManage(models.Model):
     topic_type = models.CharField(verbose_name='帖子类型', max_length=8, default='0', choices=TOPIC_TYPE, null=True, blank=True)
     school = models.CharField(verbose_name='学校', max_length=8, default='0', choices=SCHOOL, null=True, blank=True, db_index=True)
     view_count = models.IntegerField(verbose_name='浏览量', default=0)
+    view_uids = models.TextField(verbose_name='浏览的用户id', null=True, blank=True)
     is_deleted = models.BooleanField(verbose_name='是否删除', default=False)
     img_paths = models.TextField(verbose_name='图片路由', default='')
     create_time = models.DateTimeField(verbose_name='创建的时间', help_text='创建的时间', default=timezone.now)

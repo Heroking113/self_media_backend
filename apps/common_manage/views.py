@@ -46,6 +46,18 @@ def fetch_spe_config(request):
 
 
 @api_view(['GET'])
+def fetch_spe_sch_config(request):
+    key = request.query_params.get('key', '')
+    school = int(request.query_params.get('school', 0))
+    try:
+        query = Configuration.objects.get(key=key).uni_val
+        config_val = eval(query)[school][1]
+    except Exception as e:
+        return Response({'config_val': ''})
+    return Response({'config_val': config_val})
+
+
+@api_view(['GET'])
 def held_chosen_status(request):
     uid = request.query_params.get('uid', '')
     bond_code = request.query_params.get('bond_code', '')

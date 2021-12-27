@@ -1,11 +1,20 @@
 import base64
+import os
+
+def file_name_walk(file_dir):
+    file_paths = []
+    for root, dirs, files in os.walk(file_dir):
+        if '-' in root:
+            # print("root", root)  # 当前目录路径
+            # print("dirs", dirs)  # 当前路径下所有子目录
+            # print("files", files)  # 当前路径下所有非目录子文件
+            if files:
+                for fi in files:
+                    rel = root.split('/')[-1]
+                    file_paths.append('school_card/'+rel+'/'+fi)
+    return file_paths
+
 
 if __name__ == '__main__':
-
-    name = 'heroking'
-    nickname_encoder = base64.b64encode(name.encode("utf-8"))
-    str_nickname = nickname_encoder.decode('utf-8')
-    rname = base64.b64decode(str_nickname).decode('utf-8')
-    print(nickname_encoder)
-    print(str_nickname)
-    print(rname)
+    path = '/Users/heroking/Documents/convertible_bond/cb_backend/media/school_card/'
+    file_name_walk(path)

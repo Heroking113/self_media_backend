@@ -1,11 +1,14 @@
 from __future__ import absolute_import
 
+import os
 import re
 from datetime import datetime
 
 from celery import shared_task
+from django.conf import settings
 
-from .models import AssetManage, UserManage
+from utils.common import file_name_walk
+from .models import AssetManage, UserManage, SchUserManage
 from apps.base_convert.models import BaseConvert
 from apps.bond_manage.models import OwnConvertBond
 from utils.redis_cli import redisCli
@@ -56,6 +59,16 @@ def statistic_asset_pl():
     AssetManage.objects.bulk_create(bulk_create_data)
 
 
+@shared_task
+def rm_redundant_cards():
+    card_root = settings.MEDIA_ROOT + '/school_card/'
+    img_paths = file_name_walk(card_root)
+    sch_query = SchUserManage.objects.all().values('school_card')
+    sch_cards = [i['school_card'] for i in sch_query]
 
+    for im in img_paths:
+        if im not in sch_cards:
+            abs_img_path = settings.MEDIA_ROOT+'/'+im
+            os.remove(abs_img_path)
 
 

@@ -5,7 +5,22 @@ from .models import UserManage, AssetManage, SchUserManage
 
 @admin.register(SchUserManage)
 class SchUserManageAdmin(admin.ModelAdmin):
-    list_display = ('id', 'uid', 'nickname', 'school', 'wechat', 'mobile', 'avatar_url', 'openid', 'unionid', 'create_time', 'lasted_time')
+    list_display = ('id',
+                    'uid',
+                    'nickname',
+                    'school',
+                    'wechat',
+                    'mobile',
+                    'authenticate_status',
+                    'school_card',
+                    'avatar_url',
+                    'openid',
+                    'unionid',
+                    'create_time',
+                    'lasted_time')
+
+    list_editable = ('authenticate_status',)
+
     list_per_page = 50
 
 

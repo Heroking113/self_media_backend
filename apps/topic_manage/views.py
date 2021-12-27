@@ -24,65 +24,70 @@ class TopicManageViewSet(viewsets.ModelViewSet):
     serializer_class = TopicManageSerializer
     pagination_class = TopicPagination
 
-    # @action(methods=['POST'], detail=False)
-    # def fast_bulk_create(self, request):
-    #     """
-    #     快速将测试数据复制到别的学校
-    #     """
-    #     MEDIA_ROOT = '/Users/heroking/Documents/convertible_bond/cb_backend/media/'
-    #     TAR_PATH = '/Users/heroking/Documents/convertible_bond/cb_backend/media/photos/2021-12-24/'
-    #     start_time = '2021-12-24 08:00:00'
-    #     end_time = '2021-12-25 02:00:00'
-    #     nickname_list = Configuration.objects.get(key='nickname_list').uni_val
-    #     nickname_list = nickname_list.split(',')
-    #     root_path = '/Users/heroking/Documents/convertible_bond/cb_backend/media/tmp_avatars/'
-    #     files = os.listdir(root_path)
-    #
-    #     base_school_2_query = list(TopicManage.objects.filter(school='2'))
-    #     create_data = []
-    #     for bi in base_school_2_query:
-    #         tmp_img_paths = bi.img_paths.split(',') if bi.img_paths else ''
-    #         t_img_paths = []
-    #         for ii in tmp_img_paths:
-    #             if not ii:
-    #                 break
-    #             ini_img = MEDIA_ROOT + ii
-    #             img_name = '{0:%Y%m%d%H%M%S%f}'.format(datetime.now()) + str(randint(1000000, 9999999)) + '.jpg'
-    #             tar_img = TAR_PATH + img_name
-    #             shutil.copyfile(ini_img, tar_img)
-    #             t_img_paths.append('photos/2021-12-24/'+img_name)
-    #
-    #         nick_index = randint(0, len(nickname_list) - 1)
-    #         file_index = randint(0, len(files) - 1)
-    #         nickname = nickname_list[nick_index]
-    #         nickname_encoder = base64.b64encode(nickname.encode("utf-8"))
-    #         nickname = nickname_encoder.decode('utf-8')
-    #         avatar_url = 'tmp_avatars/' + files[file_index]
-    #         create_data.append(TopicManage(
-    #             uid='37jfx3o6y27',
-    #             nickname=nickname,
-    #             avatar_url=avatar_url,
-    #             title=bi.title,
-    #             content=bi.content,
-    #             topic_type=bi.topic_type,
-    #             school='7',
-    #             view_count=bi.view_count,
-    #             img_paths=','.join(t_img_paths),
-    #             create_time=self.randomDate(start_time, end_time)
-    #         ))
-    #
-    #     TopicManage.objects.bulk_create(create_data)
-    #     return Response()
+    @action(methods=['GET'], detail=False)
+    def test(self, request):
+        limit_query = eval(Configuration.objects.get(key='topic_view_count_limit').uni_val)
 
-    # def strTimeProp(self, start, end, prop, frmt):
-    #     stime = time.mktime(time.strptime(start, frmt))
-    #     etime = time.mktime(time.strptime(end, frmt))
-    #     ptime = stime + prop * (etime - stime)
-    #     return int(ptime)
-    #
-    # def randomDate(self, start, end, frmt='%Y-%m-%d %H:%M:%S'):
-    #     return time.strftime(frmt, time.localtime(self.strTimeProp(start, end, random(), frmt)))
+        return Response()
 
+    @action(methods=['POST'], detail=False)
+    def fast_bulk_create(self, request):
+        """
+        快速将测试数据复制到别的学校
+        """
+        MEDIA_ROOT = '/Users/heroking/Documents/convertible_bond/cb_backend/media/'
+        TAR_PATH = '/Users/heroking/Documents/convertible_bond/cb_backend/media/photos/2021-12-24/'
+        start_time = '2021-12-24 08:00:00'
+        end_time = '2021-12-25 02:00:00'
+        nickname_list = Configuration.objects.get(key='nickname_list').uni_val
+        nickname_list = nickname_list.split(',')
+        root_path = '/Users/heroking/Documents/convertible_bond/cb_backend/media/tmp_avatars/'
+        files = os.listdir(root_path)
+
+        base_school_2_query = list(TopicManage.objects.filter(school='2'))
+        create_data = []
+        for bi in base_school_2_query:
+            tmp_img_paths = bi.img_paths.split(',') if bi.img_paths else ''
+            t_img_paths = []
+            for ii in tmp_img_paths:
+                if not ii:
+                    break
+                ini_img = MEDIA_ROOT + ii
+                img_name = '{0:%Y%m%d%H%M%S%f}'.format(datetime.now()) + str(randint(1000000, 9999999)) + '.jpg'
+                tar_img = TAR_PATH + img_name
+                # shutil.copyfile(ini_img, tar_img)
+                t_img_paths.append('photos/2021-12-24/'+img_name)
+
+            nick_index = randint(0, len(nickname_list) - 1)
+            file_index = randint(0, len(files) - 1)
+            nickname = nickname_list[nick_index]
+            nickname_encoder = base64.b64encode(nickname.encode("utf-8"))
+            nickname = nickname_encoder.decode('utf-8')
+            avatar_url = 'tmp_avatars/' + files[file_index]
+            create_data.append(TopicManage(
+                uid='37jfx3o6y27',
+                nickname=nickname,
+                avatar_url=avatar_url,
+                title=bi.title,
+                content=bi.content,
+                topic_type=bi.topic_type,
+                school='7',
+                view_count=bi.view_count,
+                img_paths=','.join(t_img_paths),
+                create_time=self.randomDate(start_time, end_time)
+            ))
+
+        # TopicManage.objects.bulk_create(create_data)
+        return Response()
+
+    def strTimeProp(self, start, end, prop, frmt):
+        stime = time.mktime(time.strptime(start, frmt))
+        etime = time.mktime(time.strptime(end, frmt))
+        ptime = stime + prop * (etime - stime)
+        return int(ptime)
+
+    def randomDate(self, start, end, frmt='%Y-%m-%d %H:%M:%S'):
+        return time.strftime(frmt, time.localtime(self.strTimeProp(start, end, random(), frmt)))
 
     @action(methods=['POST'], detail=False)
     def bulk_update_user_profile(self, request):
@@ -104,7 +109,7 @@ class TopicManageViewSet(viewsets.ModelViewSet):
                 nickname_encoder = base64.b64encode(nickname.encode("utf-8"))
                 nickname = nickname_encoder.decode('utf-8')
                 avatar_url = 'tmp_avatars/' + files[file_index]
-                TopicManage.objects.select_for_update().filter(id=id).update(nickname=nickname, avatar_url=avatar_url)
+                # TopicManage.objects.select_for_update().filter(id=id).update(nickname=nickname, avatar_url=avatar_url)
 
         return Response()
 
@@ -134,11 +139,29 @@ class TopicManageViewSet(viewsets.ModelViewSet):
 
     @action(methods=['POST'], detail=False)
     def update_detail(self, request):
+        school = int(request.data.get('school', '0'))
+        uid = request.data.get('uid', '')
         inst_id = request.data.get('inst_id', 0)
         view_count = request.data.get('view_count', 0)
+
+        limit_query = eval(Configuration.objects.get(key='topic_view_count_limit').uni_val)
+        is_limit_open = True if limit_query[school][1] == 'open' else False
         with transaction.atomic():
-            TopicManage.objects.select_for_update().filter(id=inst_id).update(view_count=view_count)
-            return Response({'status': 'success'})
+            topic_query = TopicManage.objects.select_for_update().filter(id=inst_id)
+            if not is_limit_open:
+                topic_query.update(view_count=view_count)
+                # 浏览量加1
+                return Response({'up_status': 'plus'})
+            view_uids = topic_query[0].view_uids
+            view_uids = view_uids if view_uids else ''
+            if uid in view_uids:
+                # 浏览量不变
+                return Response({'up_status': 'original'})
+            view_uids = view_uids + uid + ','
+            topic_query.update(view_uids=view_uids, view_count=view_count)
+            # 浏览量加1
+            return Response({'up_status': 'plus'})
+
 
     @action(methods=['GET'], detail=False)
     def person_data(self, request):

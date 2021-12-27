@@ -63,6 +63,7 @@ six==1.16.0
 soupsieve==2.3.1
 sqlparse==0.4.2
 tabulate==0.8.9
+tencentcloud-sdk-python==3.0.553
 tomli==1.2.2
 tqdm==4.62.3
 Twisted==21.7.0

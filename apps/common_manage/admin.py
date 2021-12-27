@@ -12,14 +12,11 @@ class ConfigurationAdmin(admin.ModelAdmin):
                     'uni_val',
                     'instruction')
 
-    list_editable = ('key',
-                    'opt_val_one',
+    list_editable = ('opt_val_one',
                     'uni_val',
                     'instruction')
 
-    # readonly_fields = ('key',)
-
-    list_per_page = 100
+    list_per_page = 20
 
 
 @admin.register(SchSwiper)

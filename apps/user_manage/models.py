@@ -1,6 +1,12 @@
+import string
+from random import random, sample
 from time import timezone
 
-from django.db import models
+from django.db import models, transaction
+
+from utils.common import upload_path_handler
+from utils.redis_cli import redisCli
+from utils.wx_ocr import tencent_ocr
 
 
 class UserManage(models.Model):
@@ -63,6 +69,13 @@ class SchUserManage(models.Model):
         ('11', '深圳技师学院')
     )
 
+    AUTHENTICATE_STATUS = (
+        ('1', '未认证'),
+        ('2', '人工审核中'),
+        ('3', '已认证'),
+        ('4', '认证失败')
+    )
+
     uid = models.CharField(verbose_name='用户对外ID', max_length=16, default='')
     nickname = models.CharField(verbose_name='昵称', max_length=64, default='')
     avatar_url = models.TextField(verbose_name='头像地址', default='')
@@ -72,9 +85,104 @@ class SchUserManage(models.Model):
     unionid = models.CharField(max_length=256, verbose_name='unionId', blank=True, null=True)
     openid = models.CharField(max_length=256, verbose_name='openId', blank=True, null=True)
     session_key = models.CharField(max_length=256, verbose_name='session_key', blank=True, null=True)
+    authenticate_status = models.CharField(verbose_name='认证状态', max_length=8, choices=AUTHENTICATE_STATUS, default='1')
+    school_card = models.TextField(verbose_name='校卡图片地址', default='', null=True, blank=True)
+    test_field = models.TextField(verbose_name='测试', null=True, blank=True)
     create_time = models.DateTimeField(auto_now_add=True, verbose_name='创建时间')
     lasted_time = models.DateTimeField(auto_now=True, verbose_name='更新时间')
 
     class Meta:
         db_table = 'sch_user_manage'
         verbose_name_plural = verbose_name = '高校用户管理'
+
+    @classmethod
+    def handle_school_card_authenticate(cls, img_path, sch_query):
+        ocr_data = tencent_ocr(img_path)
+        card_info = ''.join([i.DetectedText for i in ocr_data])
+        school = int(sch_query[0].school)
+
+        if school == 1:
+            return cls.shenda_authenticate(card_info, sch_query)
+        if school == 2:
+            return cls.shenlv_authenticate(card_info, sch_query)
+        if school == 3:
+            return cls.nankeda_authenticate(card_info, sch_query)
+        if school == 4:
+            cls.hagongshen_authenticate(card_info, sch_query)
+        if school == 5:
+            cls.gangzhongshen_authenticate(card_info, sch_query)
+        if school == 6:
+            cls.shenzhiyuan_authenticate(card_info, sch_query)
+        if school == 7:
+            cls.shenxinxi_authenticate(card_info, sch_query)
+        if school == 8:
+            cls.zhongshen_authenticate(card_info, sch_query)
+        if school == 9:
+            cls.shenzhenligong_authenticate(card_info, sch_query)
+        if school == 10:
+            cls.shenbeimo_authenticate(card_info, sch_query)
+        if school == 11:
+            cls.shenjishi_authenticate(card_info, sch_query)
+
+    @staticmethod
+    def shenda_authenticate(card_info, sch_query):
+        return ''
+
+    @staticmethod
+    def shenlv_authenticate(card_info, sch_query):
+        check_fields = ['暨南大', '学生卡', '姓名', '学生类别', '学号', '发证日期', '卡号']
+        is_verified = True
+        for ci in check_fields:
+            if ci not in card_info:
+                is_verified = False
+                break
+        return is_verified
+
+    @staticmethod
+    def nankeda_authenticate(card_info, sch_query):
+        """南科大校园身份验证函数，暂时用深旅的测试"""
+        check_fields = ['暨南大', '学生卡', '姓名', '学生类别', '学号', '发证日期', '卡号']
+        is_verified = True
+        for ci in check_fields:
+            if ci not in card_info:
+                is_verified = False
+                break
+        with transaction.atomic():
+            ran_str = ''.join(sample(string.ascii_letters + string.digits, 8))
+            if is_verified:
+                sch_query.update(authenticate_status='3', test_field=ran_str)
+                return {'authenticate_status': '已认证'}
+            sch_query.update(authenticate_status='2', test_field=ran_str)
+            return {'authenticate_status': '人工审核'}
+
+    @staticmethod
+    def hagongshen_authenticate(card_info, sch_query):
+        return ''
+
+    @staticmethod
+    def gangzhongshen_authenticate(card_info, sch_query):
+        return ''
+
+    @staticmethod
+    def shenzhiyuan_authenticate(card_info, sch_query):
+        return ''
+
+    @staticmethod
+    def shenxinxi_authenticate(card_info, sch_query):
+        return ''
+
+    @staticmethod
+    def zhongshen_authenticate(card_info, sch_query):
+        return ''
+
+    @staticmethod
+    def shenzhenligong_authenticate(card_info, sch_query):
+        return ''
+
+    @staticmethod
+    def shenbeimo_authenticate(card_info, sch_query):
+        return ''
+
+    @staticmethod
+    def shenjishi_authenticate(card_info, sch_query):
+        return ''

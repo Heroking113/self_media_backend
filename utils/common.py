@@ -1,3 +1,4 @@
+import base64
 import random
 import smtplib
 import string
@@ -191,9 +192,9 @@ def format_datetime(date_time):
         return date_time.strftime('%y-%m-%d %H:%M')
 
 
-def upload_path_handler():
+def upload_path_handler(dir_name='photos'):
     now_date = datetime.now().strftime('%Y-%m-%d')
-    return "photos/{time}".format(time=now_date)
+    return "{dir_name}/{time}".format(dir_name=dir_name, time=now_date)
 
 
 def ip_authentication(request_meta, ip_whitelist):
@@ -204,3 +205,23 @@ def ip_authentication(request_meta, ip_whitelist):
     if client_ip in ip_whitelist:
         return True
     return False
+
+
+def encode_pic_to_base64st(path):
+    with open(path, 'rb') as f:
+        buffer = base64.b64encode(f.read())
+        return str(buffer, encoding="utf-8")
+
+
+def file_name_walk(file_dir):
+    file_paths = []
+    for root, dirs, files in os.walk(file_dir):
+        if '-' in root:
+            # print("root", root)  # 当前目录路径
+            # print("dirs", dirs)  # 当前路径下所有子目录
+            # print("files", files)  # 当前路径下所有非目录子文件
+            if files:
+                for fi in files:
+                    rel = root.split('/')[-1]
+                    file_paths.append('school_card/'+rel+'/'+fi)
+    return file_paths
