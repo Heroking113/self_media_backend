@@ -87,7 +87,6 @@ class SchUserManage(models.Model):
     session_key = models.CharField(max_length=256, verbose_name='session_key', blank=True, null=True)
     authenticate_status = models.CharField(verbose_name='认证状态', max_length=8, choices=AUTHENTICATE_STATUS, default='1')
     school_card = models.TextField(verbose_name='校卡图片地址', default='', null=True, blank=True)
-    test_field = models.TextField(verbose_name='测试', null=True, blank=True)
     create_time = models.DateTimeField(auto_now_add=True, verbose_name='创建时间')
     lasted_time = models.DateTimeField(auto_now=True, verbose_name='更新时间')
 
@@ -130,13 +129,19 @@ class SchUserManage(models.Model):
 
     @staticmethod
     def shenlv_authenticate(card_info, sch_query):
+        """深旅校园身份验证函数"""
         check_fields = ['暨南大', '学生卡', '姓名', '学生类别', '学号', '发证日期', '卡号']
         is_verified = True
         for ci in check_fields:
             if ci not in card_info:
                 is_verified = False
                 break
-        return is_verified
+        with transaction.atomic():
+            if is_verified:
+                sch_query.update(authenticate_status='3')
+                return {'authenticate_status': '已认证'}
+            sch_query.update(authenticate_status='2')
+            return {'authenticate_status': '人工审核'}
 
     @staticmethod
     def nankeda_authenticate(card_info, sch_query):
@@ -148,11 +153,10 @@ class SchUserManage(models.Model):
                 is_verified = False
                 break
         with transaction.atomic():
-            ran_str = ''.join(sample(string.ascii_letters + string.digits, 8))
             if is_verified:
-                sch_query.update(authenticate_status='3', test_field=ran_str)
+                sch_query.update(authenticate_status='3')
                 return {'authenticate_status': '已认证'}
-            sch_query.update(authenticate_status='2', test_field=ran_str)
+            sch_query.update(authenticate_status='2')
             return {'authenticate_status': '人工审核'}
 
     @staticmethod
@@ -169,7 +173,19 @@ class SchUserManage(models.Model):
 
     @staticmethod
     def shenxinxi_authenticate(card_info, sch_query):
-        return ''
+        """深信息校园身份验证函数，暂时用深旅的测试"""
+        check_fields = ['暨南大', '学生卡', '姓名', '学生类别', '学号', '发证日期', '卡号']
+        is_verified = True
+        for ci in check_fields:
+            if ci not in card_info:
+                is_verified = False
+                break
+        with transaction.atomic():
+            if is_verified:
+                sch_query.update(authenticate_status='3')
+                return {'authenticate_status': '已认证'}
+            sch_query.update(authenticate_status='2')
+            return {'authenticate_status': '人工审核'}
 
     @staticmethod
     def zhongshen_authenticate(card_info, sch_query):
@@ -185,4 +201,16 @@ class SchUserManage(models.Model):
 
     @staticmethod
     def shenjishi_authenticate(card_info, sch_query):
-        return ''
+        """深技师校园身份验证函数，暂时用深旅的测试"""
+        check_fields = ['暨南大', '学生卡', '姓名', '学生类别', '学号', '发证日期', '卡号']
+        is_verified = True
+        for ci in check_fields:
+            if ci not in card_info:
+                is_verified = False
+                break
+        with transaction.atomic():
+            if is_verified:
+                sch_query.update(authenticate_status='3')
+                return {'authenticate_status': '已认证'}
+            sch_query.update(authenticate_status='2')
+            return {'authenticate_status': '人工审核'}

@@ -61,6 +61,7 @@ def statistic_asset_pl():
 
 @shared_task
 def rm_redundant_cards():
+    """凌晨三点删除冗余的校卡图片"""
     card_root = settings.MEDIA_ROOT + '/school_card/'
     img_paths = file_name_walk(card_root)
     sch_query = SchUserManage.objects.all().values('school_card')

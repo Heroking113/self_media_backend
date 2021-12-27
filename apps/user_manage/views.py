@@ -103,8 +103,7 @@ class SchUserManageViewSet(viewsets.ModelViewSet):
                     f.write(i)
             SchUserManage.handle_school_card_authenticate(abs_img_path, sch_query)
             serializer = self.get_serializer(sch_query[0])
-        test_field = serializer.data['test_field']
-        return Response({'test_field': test_field})
+        return Response(serializer.data)
 
 
 class UserManageViewSet(viewsets.ModelViewSet):
