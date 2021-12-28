@@ -14,19 +14,21 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.conf import settings
+from django.conf.urls import url
 from django.contrib import admin
 from django.urls import path, include, re_path
 from django.views.static import serve
 
-# 可转债小程序路由
+from django.views.generic import TemplateView
 
+# 可转债小程序路由
 urlpatterns = [
     path('admin_super_server/', admin.site.urls),
     path('user/', include('apps.user_manage.urls')),
     path('bc/', include('apps.base_convert.urls')),
     path('bm/', include('apps.bond_manage.urls')),
     path('cm/', include('apps.common_manage.urls')),
-    path('chat/', include('apps.chat.urls'))
+    path('chat/', include('apps.chat.urls')),
 ]
 
 # 高校小程序路由
@@ -34,6 +36,11 @@ urlpatterns += [
     path('sch/idle/', include('apps.idle_manage.urls')),
     path('sch/topic/', include('apps.topic_manage.urls')),
     path('sch/file/', include('apps.file_manage.urls'))
+]
+
+# vue页面路由
+urlpatterns += [
+    url(r'^$', TemplateView.as_view(template_name="index.html")),
 ]
 
 
