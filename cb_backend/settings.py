@@ -110,7 +110,7 @@ ENV = 'DEV'
 
 ALLOWED_HOSTS = ['*']
 
-DOMAIN = 'http://localhost:8008' if ENV == 'DEV' else 'https://www.worldo2o.top'
+DOMAIN = 'http://localhost:8008' if ENV == 'DEV' else 'https://www.xizhengmy.cn'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
 
