@@ -10,7 +10,6 @@ class RedisCli:
         self.r = redis.StrictRedis(connection_pool=self.pool)
 
     def set(self, key, value, ex=259200):
-        print(123)
         if isinstance(value, list) or isinstance(value, dict):
             value = json.dumps(value)
         # 默认设置3*24h的过期时间

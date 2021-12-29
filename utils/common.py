@@ -225,3 +225,13 @@ def file_name_walk(file_dir):
                     rel = root.split('/')[-1]
                     file_paths.append('school_card/'+rel+'/'+fi)
     return file_paths
+
+
+def str_time_prop(start, end, prop, frmt):
+    stime = time.mktime(time.strptime(start, frmt))
+    etime = time.mktime(time.strptime(end, frmt))
+    ptime = stime + prop * (etime - stime)
+    return int(ptime)
+
+def random_date(start, end, frmt='%Y-%m-%d %H:%M:%S'):
+    return time.strftime(frmt, time.localtime(str_time_prop(start, end, random.random(), frmt)))

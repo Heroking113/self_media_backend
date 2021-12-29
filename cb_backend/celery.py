@@ -61,8 +61,8 @@ app.conf.update(
             'task': 'apps.bond_manage.tasks.statistic_day_bond_pl',
             'schedule': crontab(minute=15, hour=15)
         },
-        'fetch_access_token': {
-            'task': 'apps.common_manage.tasks.fetch_access_token',
+        'fetch_sch_all_access_token': {
+            'task': 'apps.common_manage.tasks.fetch_sch_all_access_token',
             'schedule': crontab(minute=0, hour='*')
         },
         'clean_up_topic_view_uids': {

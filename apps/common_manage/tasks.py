@@ -1,6 +1,3 @@
-import ast
-
-import requests
 from celery import shared_task
 from django.conf import settings
 from django.db import transaction
@@ -9,21 +6,19 @@ from apps.topic_manage.models import TopicManage, CommentManage
 from apps.user_manage.models import SchUserManage
 from utils.redis_cli import redisCli
 
-APP_ID = settings.SCH_ID_SECRET[2]['APP_ID']
-APP_SECRET = settings.SCH_ID_SECRET[2]['APP_SECRET']
+from utils.wx_util import fetch_sch_access_token
 
 
 @shared_task
-def fetch_access_token():
-    headers = {
-    'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/67.0.3396.87 Safari/537.36'
-    }
-    url = 'https://api.weixin.qq.com/cgi-bin/token?grant_type=client_credential&appid=' + APP_ID + '&secret=' + APP_SECRET
-    res = requests.get(url=url, headers=headers, verify=False).text
-    res = ast.literal_eval(res)
-    access_token = res.get('access_token', '')
-    redisCli.set(key='access_token', value=access_token, ex=6600)
-    return access_token
+def fetch_sch_all_access_token():
+    SCH_ID_SECRET = settings.SCH_ID_SECRET
+    for index, item in enumerate(SCH_ID_SECRET):
+        if item and item['APP_ID'] and item['APP_SECRET']:
+            print(index)
+            access_token = fetch_sch_access_token(item['APP_ID'], item['APP_SECRET'])
+            key = 'access_token_' + str(index)
+            redisCli.set(key=key, value=access_token, ex=6600)
+
 
 @shared_task
 def update_user_profile(params, is_update_userprofile=True):

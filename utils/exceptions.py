@@ -20,3 +20,11 @@ class HTTP_498_NOT_IN_IP_WHITELIST(APIException):
 
 class HTTP_497_REQUEST_SIZE_LIMIT_EXCEEDED(APIException):
     status_code = 497
+
+
+class HTTP_496_MSG_SENSITIVE(APIException):
+    status_code = 496
+
+
+class HTTP_495_IMG_SENSITIVE(APIException):
+    status_code = 495

@@ -2,10 +2,8 @@
 
 import base64
 import os
-import shutil
 from datetime import datetime
-import time
-from random import randint, random
+from random import randint
 
 from django.conf import settings
 from django.db import transaction
@@ -14,7 +12,10 @@ from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
+from utils.common import random_date
+from utils.exceptions import HTTP_496_MSG_SENSITIVE
 from utils.pagination import CommentMsgPagination, TopicPagination
+from utils.wx_util import wx_msg_sec_check
 from .models import TopicManage, CommentManage
 from .serializers import TopicManageSerializer, CommentManageSerializer
 from ..common_manage.models import Configuration
@@ -26,10 +27,15 @@ class TopicManageViewSet(viewsets.ModelViewSet):
     serializer_class = TopicManageSerializer
     pagination_class = TopicPagination
 
-    @action(methods=['GET'], detail=False)
+    @action(methods=['POST'], detail=False)
     def test(self, request):
-        limit_query = eval(Configuration.objects.get(key='topic_view_count_limit').uni_val)
-
+        openid = request.data.get('openid', '')
+        content = request.data.get('content', '')
+        school = request.data.get('school', '')
+        title = request.data.get('title', '')
+        ret = wx_msg_sec_check(school, openid, content, title)
+        if ret['suggest'] == 'pass':
+            raise HTTP_496_MSG_SENSITIVE('存在违规/敏感信息')
         return Response()
 
     @action(methods=['POST'], detail=False)
@@ -76,25 +82,16 @@ class TopicManageViewSet(viewsets.ModelViewSet):
                 school='7',
                 view_count=bi.view_count,
                 img_paths=','.join(t_img_paths),
-                create_time=self.randomDate(start_time, end_time)
+                create_time=random_date(start_time, end_time)
             ))
 
         # TopicManage.objects.bulk_create(create_data)
         return Response()
 
-    def strTimeProp(self, start, end, prop, frmt):
-        stime = time.mktime(time.strptime(start, frmt))
-        etime = time.mktime(time.strptime(end, frmt))
-        ptime = stime + prop * (etime - stime)
-        return int(ptime)
-
-    def randomDate(self, start, end, frmt='%Y-%m-%d %H:%M:%S'):
-        return time.strftime(frmt, time.localtime(self.strTimeProp(start, end, random(), frmt)))
-
     @action(methods=['POST'], detail=False)
     def bulk_update_user_profile(self, request):
         """
-            更新帖子的用户昵称和头像
+            批量更新帖子的用户昵称和头像
         """
         nickname_list = Configuration.objects.get(key='nickname_list').uni_val
         nickname_list = nickname_list.split(',')
@@ -116,12 +113,22 @@ class TopicManageViewSet(viewsets.ModelViewSet):
         return Response()
 
     def create(self, request, *args, **kwargs):
+        # 文本是否违规检测
         data = request.data
+        openid = data.get('openid', '')
+        content = data.get('content', '')
+        school = data.get('school', '')
+        title = data.get('title', '')
+        ret = wx_msg_sec_check(school, openid, content, title)
+        if ret['suggest'] != 'pass':
+            raise HTTP_496_MSG_SENSITIVE('存在违规/敏感信息')
+
+        data.pop('openid')
         nickname = data.get('nickname', '')
         nickname_encoder = base64.b64encode(nickname.encode("utf-8"))
         nickname = nickname_encoder.decode('utf-8')
         data['nickname'] = nickname
-        serializer = self.get_serializer(data=request.data)
+        serializer = self.get_serializer(data=data)
         serializer.is_valid(raise_exception=True)
         self.perform_create(serializer)
         headers = self.get_success_headers(serializer.data)

@@ -90,7 +90,7 @@ class ImageFileSerializer(serializers.ModelSerializer):
             }
             update_user_profile.delay(user_profile)
         # 图片违规检测
-        async_img_sec_check.delay(json.dumps(li_params))
+        async_img_sec_check(json.dumps(li_params))
 
         # 必须要有个返回值，不然报错
         return ret
