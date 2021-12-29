@@ -121,7 +121,7 @@ class TopicManageViewSet(viewsets.ModelViewSet):
         title = data.get('title', '')
         ret = wx_msg_sec_check(school, openid, content, title)
         if ret['suggest'] != 'pass':
-            raise HTTP_496_MSG_SENSITIVE('存在违规/敏感信息')
+            raise HTTP_496_MSG_SENSITIVE('内容含违规信息')
 
         data.pop('openid')
         nickname = data.get('nickname', '')
@@ -210,7 +210,15 @@ class CommentViewSet(viewsets.ModelViewSet):
         return CommentManage.objects.filter(Q(inst_id=inst_id) & Q(is_deleted=False))
 
     def create(self, request, *args, **kwargs):
+        # 文本是否违规检测
         data = request.data
+        openid = data.pop('openid', '')
+        content = data.get('content', '')
+        school = data.pop('school', '')
+        ret = wx_msg_sec_check(school, openid, content)
+        if ret['suggest'] != 'pass':
+            raise HTTP_496_MSG_SENSITIVE('内容含违规信息')
+
         nickname = data.get('nickname', '')
         nickname_encoder = base64.b64encode(nickname.encode("utf-8"))
         nickname = nickname_encoder.decode('utf-8')

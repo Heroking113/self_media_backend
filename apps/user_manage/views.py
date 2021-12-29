@@ -10,6 +10,7 @@ from rest_framework import viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
+from utils.exceptions import HTTP_496_MSG_SENSITIVE
 from utils.redis_cli import redisCli
 from .models import UserManage, AssetManage
 from .serializers import UserManageSerializer, AssetManageSerializer
@@ -18,7 +19,7 @@ from utils.common import set_uid, upload_path_handler
 from .models import SchUserManage
 from .serializers import SchUserManageSerializer
 from ..common_manage.tasks import update_user_profile
-from utils.wx_util import get_openid_session_key_by_code
+from utils.wx_util import get_openid_session_key_by_code, wx_msg_sec_check
 
 FLAG = 1
 
@@ -60,8 +61,15 @@ class SchUserManageViewSet(viewsets.ModelViewSet):
 
     @action(methods=['POST'], detail=False)
     def update_profile(self, request):
+        # 文本是否违规检测
         data = request.data
+        openid = data.pop('openid', '')
         nickname = data.get('nickname', '')
+        school = data.get('school', '')
+        ret = wx_msg_sec_check(school, openid, nickname)
+        if ret['suggest'] != 'pass':
+            raise HTTP_496_MSG_SENSITIVE('内容含违规信息')
+
         if not nickname:
             queryset = SchUserManage.objects.get(uid=data['uid'])
             serializer = self.get_serializer(queryset)
