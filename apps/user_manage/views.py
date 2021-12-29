@@ -66,20 +66,18 @@ class SchUserManageViewSet(viewsets.ModelViewSet):
         openid = data.pop('openid', '')
         nickname = data.get('nickname', '')
         school = data.get('school', '')
-        ret = wx_msg_sec_check(school, openid, nickname)
-        if ret['suggest'] != 'pass':
-            raise HTTP_496_MSG_SENSITIVE('内容含违规信息')
+        if openid and nickname and school:
+            ret = wx_msg_sec_check(school, openid, nickname)
+            if ret['suggest'] != 'pass':
+                raise HTTP_496_MSG_SENSITIVE('内容含违规信息')
 
-        if not nickname:
-            queryset = SchUserManage.objects.get(uid=data['uid'])
-            serializer = self.get_serializer(queryset)
-            return Response(serializer.data)
-
-        nickname_encoder = base64.b64encode(nickname.encode("utf-8"))
-        nickname = nickname_encoder.decode('utf-8')
-        data['nickname'] = nickname
-        update_data = {'nickname': nickname}
-        if 'avatar_url' in data:
+        update_data = {}
+        if nickname:
+            nickname_encoder = base64.b64encode(nickname.encode("utf-8"))
+            nickname = nickname_encoder.decode('utf-8')
+            data['nickname'] = nickname
+            update_data['nickname'] = nickname
+        if data.get('avatar_url', ''):
             update_data['avatar_url'] = data['avatar_url']
         with transaction.atomic():
             SchUserManage.objects.select_for_update().filter(uid=data['uid']).update(**update_data)
