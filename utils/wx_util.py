@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 import json
 
 import requests
@@ -46,6 +48,47 @@ def wx_img_sec_check(buffer, inst_info):
     if not access_token:
         access_token = fetch_access_token()
     url = 'https://api.weixin.qq.com/wxa/img_sec_check?access_token=' + access_token
+    res = requests.post(url=url, headers=headers, files=data)
+    if res.status_code == 200:
+        ret = json.loads(res.text)
+        # 违规:
+        # 1、软删除该条信息；
+        # 2、邮箱通知管理员（1819785416@qq.com），由管理员通知客服联系发布者处理
+        type_display = ''
+        if ret.get('errcode', 0) == 87014:
+            with transaction.atomic():
+                """
+                    软删除内容
+                    邮箱通知我
+                """
+                if inst_info['inst_type'] == '2':
+                    TopicManage.objects.select_for_update().filter(id=inst_info['inst_id']).update(is_deleted=True)
+                    type_display = '帖子'
+                if inst_info['inst_type'] == '3':
+                    IdleManage.objects.select_for_update().filter(id=inst_info['inst_id']).update(is_deleted=True)
+                    type_display = '闲置'
+
+            # 发送邮件
+            title = '有违规图片'
+            up_content = '类型:{type_display}, id:{inst_id}, school:{school}'.format(type_display=type_display,
+                                                                                   inst_id=inst_info['inst_id'],
+                                                                                   school=inst_info['school'])
+            send_email(title, up_content)
+
+
+def wx_msg_sec_check(buffer, inst_info):
+    headers = {
+        'Content-Type': 'multipart/form-data'
+    }
+    data = {
+        'version': 2,
+        'scene': 3,
+
+    }
+    access_token = redisCli.get('access_token') or ''
+    if not access_token:
+        access_token = fetch_access_token()
+    url = 'https://api.weixin.qq.com/wxa/msg_sec_check?access_token=' + access_token
     res = requests.post(url=url, headers=headers, files=data)
     if res.status_code == 200:
         ret = json.loads(res.text)

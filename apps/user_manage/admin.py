@@ -21,6 +21,8 @@ class SchUserManageAdmin(admin.ModelAdmin):
 
     list_editable = ('authenticate_status',)
 
+    list_filter = ('school', 'authenticate_status')
+
     list_per_page = 50
 
 
