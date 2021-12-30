@@ -34,16 +34,6 @@ class ImageFileSerializer(serializers.ModelSerializer):
         inst_id = self.initial_data.get('inst_id', '0')
         school = self.initial_data.get('school', '0')
 
-        if inst_type == '4':
-            with transaction.atomic():
-                pre_query = ImageFile.objects.select_for_update().filter(Q(inst_id=inst_id)
-                                                                         & Q(inst_type=inst_type)
-                                                                         & Q(school=school))
-                if pre_query:
-                    for item in pre_query:
-                        os.remove(settings.MEDIA_ROOT + '/' + item.file_path.name)
-                    pre_query.delete()
-
         img_list = []
         li_params = []
         for index, url in enumerate(imgs):
@@ -64,7 +54,22 @@ class ImageFileSerializer(serializers.ModelSerializer):
                 'school': school
             })
 
-        ret = ImageFile.objects.bulk_create(img_list)
+        with transaction.atomic():
+            # 先删除原来的头像信息
+            if inst_type == '4':
+                try:
+                    pre_query = ImageFile.objects.select_for_update().filter(Q(inst_id=inst_id)
+                                                                             & Q(inst_type=inst_type)
+                                                                             & Q(school=school))
+                    if pre_query:
+                        for item in pre_query:
+                            os.remove(settings.MEDIA_ROOT + '/' + item.file_path.name)
+                        pre_query.delete()
+                except:
+                    pass
+            # 创建图片信息
+            ret = ImageFile.objects.bulk_create(img_list)
+
         with transaction.atomic():
             if inst_type == '2':
                 # 帖子
@@ -81,16 +86,17 @@ class ImageFileSerializer(serializers.ModelSerializer):
                     [item.file_path.name for item in ret])
                 IdleManage.objects.select_for_update().filter(id=inst_id).update(img_paths=img_paths)
 
+        # 图片违规检测
+        async_img_sec_check(json.dumps(li_params))
+
         if inst_type == '4':
-            # avatar
+            # 更新所有相关数据的头像信息
             user_profile = {
                 'avatar_url': ret[0].file_path.name,
                 'uid': inst_id,
                 'school': school
             }
             update_user_profile.delay(user_profile)
-        # 图片违规检测
-        async_img_sec_check(json.dumps(li_params))
 
         # 必须要有个返回值，不然报错
         return ret

@@ -14,7 +14,6 @@ def fetch_sch_all_access_token():
     SCH_ID_SECRET = settings.SCH_ID_SECRET
     for index, item in enumerate(SCH_ID_SECRET):
         if item and item['APP_ID'] and item['APP_SECRET']:
-            print(index)
             access_token = fetch_sch_access_token(item['APP_ID'], item['APP_SECRET'])
             key = 'access_token_' + str(index)
             redisCli.set(key=key, value=access_token, ex=6600)

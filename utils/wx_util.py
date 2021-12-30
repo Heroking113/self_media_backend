@@ -7,10 +7,8 @@ import logging
 from django.conf import settings
 from django.db import transaction
 
-from apps.file_manage.models import ImageFile
 from apps.idle_manage.models import IdleManage
 from apps.topic_manage.models import TopicManage
-from utils.common import send_email
 from utils.exceptions import GET_SESSION_KEY_OPENID_FAIL_598, HTTP_495_IMG_SENSITIVE
 from utils.redis_cli import redisCli
 
@@ -86,7 +84,10 @@ def wx_img_sec_check(school, buffer, inst_info):
                 if inst_info['inst_type'] == '3':
                     IdleManage.objects.select_for_update().filter(id=inst_info['inst_id']).update(is_deleted=True)
                     type_display = '闲置'
+            err_msg = '图片违规: ' + str(inst_info)
+            logger.warning(err_msg)
             raise HTTP_495_IMG_SENSITIVE('图片违规')
+            #
             # 发送邮件
             # title = '有违规图片'
             # up_content = '类型:{type_display}, id:{inst_id}, school:{school}'.format(type_display=type_display,
@@ -96,9 +97,9 @@ def wx_img_sec_check(school, buffer, inst_info):
 
 
 def wx_msg_sec_check(school, openid, content, title=''):
-    headers = {
-        'Content-Type': 'multipart/form-data'
-    }
+    # headers = {
+    #     'Content-Type': 'application/json'
+    # }
     data = {
         'version': 2,
         'scene': 3,
@@ -106,6 +107,10 @@ def wx_msg_sec_check(school, openid, content, title=''):
         'content': content,
         'title': title
     }
+    headers = {
+        'Content-Type': 'application/json'
+    }
+    data = str(data).replace("'", '"')
     key = 'access_token_' + str(school)
     access_token = redisCli.get(key) or ''
     if not access_token:
@@ -115,10 +120,13 @@ def wx_msg_sec_check(school, openid, content, title=''):
         APP_SECRET = id_secret['APP_SECRET']
         access_token = fetch_sch_access_token(APP_ID, APP_SECRET, reset=True, sch_index=school)
     url = 'https://api.weixin.qq.com/wxa/msg_sec_check?access_token=' + access_token
-    res = requests.post(url=url, headers=headers, data=json.dumps(data))
+    res = requests.post(url=url, headers=headers, data=data.encode('utf-8'))
     if res.status_code == 200:
-        ret = json.loads(res.text)
-        return ret['result']
+        result = json.loads(res.text)['result']
+        if result['suggest'] != 'pass':
+            err_msg = '内容违规: ' + data
+            logger.warning(err_msg)
+        return result
     return {
         'suggest': 'pass',
         'label': 100
