@@ -176,7 +176,7 @@ class TopicManageViewSet(viewsets.ModelViewSet):
     def person_data(self, request):
         uid = request.query_params.get('uid', '')
         topic_type = request.query_params.get('topic_type', '0')
-        queryset = TopicManage.objects.filter(Q(uid=uid) & Q(topic_type=topic_type)).order_by('-create_time')
+        queryset = TopicManage.objects.filter(Q(uid=uid) & Q(topic_type=topic_type) & Q(is_deleted=False)).order_by('-create_time')
         page = self.paginate_queryset(queryset)
         serializer = self.get_serializer(page, many=True)
         return self.get_paginated_response(serializer.data)

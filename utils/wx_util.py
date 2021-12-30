@@ -25,9 +25,8 @@ def fetch_sch_access_token(APP_ID, APP_SECRET, reset=False, sch_index=0):
     access_token = res.get('access_token', '')
     if reset:
         key = 'access_token_' + str(sch_index)
-        redisCli.set(key=key, value=access_token, ex=6600)
+        redisCli.set(key=key, value=access_token, ex=4200)
     return access_token
-
 
 
 def get_openid_session_key_by_code(js_code, app_id, app_secret):
@@ -122,6 +121,9 @@ def wx_msg_sec_check(school, openid, content, title=''):
     url = 'https://api.weixin.qq.com/wxa/msg_sec_check?access_token=' + access_token
     res = requests.post(url=url, headers=headers, data=data.encode('utf-8'))
     if res.status_code == 200:
+        ret = json.loads(res.text)
+        if ret['errcode'] == 40001:
+            return re_exe_wx_msg_sec_check(school, headers, data)
         result = json.loads(res.text)['result']
         if result['suggest'] != 'pass':
             err_msg = '内容违规: ' + data
@@ -132,3 +134,13 @@ def wx_msg_sec_check(school, openid, content, title=''):
         'label': 100
     }
 
+
+def re_exe_wx_msg_sec_check(school, headers, data):
+    school = int(school)
+    id_secret = settings.SCH_ID_SECRET[school]
+    APP_ID = id_secret['APP_ID']
+    APP_SECRET = id_secret['APP_SECRET']
+    access_token = fetch_sch_access_token(APP_ID, APP_SECRET, reset=True, sch_index=school)
+    url = 'https://api.weixin.qq.com/wxa/msg_sec_check?access_token=' + access_token
+    res = requests.post(url=url, headers=headers, data=data.encode('utf-8'))
+    return json.loads(res.text)['result']
