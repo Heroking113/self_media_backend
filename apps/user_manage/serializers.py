@@ -12,7 +12,7 @@ class UserManageSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = UserManage
-        fields = ['uid', 'nickname', 'avatar_url', 'unionid', 'gender', 'city', 'province']
+        fields = ['uid', 'nickname', 'avatar_url', 'unionid', 'gender']
 
     def to_representation(self, instance):
         data = super().to_representation(instance)

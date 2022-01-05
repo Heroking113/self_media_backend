@@ -21,8 +21,6 @@ from .serializers import SchUserManageSerializer
 from ..common_manage.tasks import update_user_profile
 from utils.wx_util import get_openid_session_key_by_code, wx_msg_sec_check
 
-FLAG = 1
-
 
 class SchUserManageViewSet(viewsets.ModelViewSet):
     queryset = SchUserManage.objects.all()
@@ -127,8 +125,8 @@ class UserManageViewSet(viewsets.ModelViewSet):
     def login(self, request):
         js_code = request.data.get('js_code', '')
         # 获取 session_key 和 openid
-        app_id = settings.APP_ID
-        app_secret = settings.APP_SECRET
+        app_id = settings.BOND_APP_ID
+        app_secret = settings.BOND_APP_SECRET
         dic_session_key_openid = get_openid_session_key_by_code(js_code, app_id, app_secret)
         session_key = dic_session_key_openid['session_key']
         openid = dic_session_key_openid['openid']

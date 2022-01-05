@@ -9,7 +9,8 @@
 __pycache__
 
 media/
-static/
+static/admin/
+static/rest_framework/
 
 # Backup files #
 

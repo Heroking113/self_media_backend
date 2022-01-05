@@ -22,8 +22,8 @@ BASE_DIR = Path(__file__).resolve(strict=True).parent.parent
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = 'a2nqj%9)l8vbxtry2yfy+zlqlx9e0s#4gm*0u*8$q7d_y2g7zu'
 
-APP_ID = 'wxe33fc2974499db5f'
-APP_SECRET = '06ed44a39bce2c6fe897f22ef892f5a7'
+BOND_APP_ID = 'wxe33fc2974499db5f'
+BOND_APP_SECRET = '06ed44a39bce2c6fe897f22ef892f5a7'
 
 
 # APP_ID__&__APP_SECRET
