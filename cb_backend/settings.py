@@ -131,7 +131,7 @@ INSTALLED_APPS = [
     'apps.common_manage',
     'apps.file_manage',
     'apps.idle_manage',
-    'apps.topic_manage',
+    'apps.topic_manage'
 ]
 
 # channels相关
