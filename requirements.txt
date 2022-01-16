@@ -16,15 +16,19 @@ channels==3.0.3
 channels-redis==3.3.1
 charset-normalizer==2.0.8
 constantly==15.1.0
+coverage==5.5
 cryptography==36.0.0
 cycler==0.11.0
 daphne==3.0.2
 decorator==5.1.0
+deprecation==2.1.0
 distlib==0.3.1
 Django==3.2.3
 djangorestframework==3.12.4
 et-xmlfile==1.1.0
+eyed3==0.9.6
 filelock==3.0.12
+filetype==1.0.9
 fonttools==4.28.3
 gevent==21.1.2
 greenlet==1.0.0
@@ -64,6 +68,7 @@ soupsieve==2.3.1
 sqlparse==0.4.2
 tabulate==0.8.9
 tencentcloud-sdk-python==3.0.553
+toml==0.10.2
 tomli==1.2.2
 tqdm==4.62.3
 Twisted==21.7.0

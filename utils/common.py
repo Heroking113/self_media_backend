@@ -207,7 +207,7 @@ def ip_authentication(request_meta, ip_whitelist):
     return False
 
 
-def encode_pic_to_base64st(path):
+def encode_file_to_base64st(path):
     with open(path, 'rb') as f:
         buffer = base64.b64encode(f.read())
         return str(buffer, encoding="utf-8")

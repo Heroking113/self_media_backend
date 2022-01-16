@@ -1,12 +1,6 @@
-import string
-from random import random, sample
-from time import timezone
-
 from django.db import models, transaction
 
-from utils.common import upload_path_handler
-from utils.redis_cli import redisCli
-from utils.wx_ocr import tencent_ocr
+from utils.tencent_sdk import tencent_ocr
 
 
 class UserManage(models.Model):

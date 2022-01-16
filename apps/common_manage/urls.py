@@ -6,14 +6,14 @@ from .views import (fetch_spe_config,
                     asset_info,
                     fetch_spe_sch_config,
                     SchSwiperViewSet,
-                    test)
+                    sentence_recognition)
 
 urlpatterns = [
     path('fetch_spe_config/', fetch_spe_config),
     path('held_chosen_status/', held_chosen_status),
     path('asset_info/', asset_info),
     path('fetch_spe_sch_config/', fetch_spe_sch_config),
-    path('test/', test)
+    path('sentence_recognition/', sentence_recognition)
 ]
 
 router = DefaultRouter()

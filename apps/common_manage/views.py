@@ -12,6 +12,7 @@ from rest_framework.viewsets import GenericViewSet
 
 from utils.common import ip_authentication
 from utils.exceptions import HTTP_498_NOT_IN_IP_WHITELIST
+from utils.tencent_sdk import get_sentence_recognition
 from .models import SchSwiper
 from .serializers import SchSwiperSerializer
 
@@ -27,13 +28,12 @@ from ..base_convert.serializers import BaseConvertSerializer
 logger = logging.getLogger('cb_backend')
 
 
-@api_view(['GET'])
-def test(request):
+@api_view(['POST'])
+def sentence_recognition(request):
     # ip 验证
-    ip_whitelist = Configuration.objects.get(key='create_swiper_ip_whitelist').uni_val
-    if not ip_authentication(request.META, ip_whitelist):
-        raise HTTP_498_NOT_IN_IP_WHITELIST('无权发起请求')
-    return Response({'hero': 'king'})
+    mp3_file_path = '/Users/heroking/Documents/convertible_bond/cb_backend/media/zh_1.mp3'
+    ret = get_sentence_recognition(mp3_file_path)
+    return Response(ret)
 
 
 @api_view(['POST'])

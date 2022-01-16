@@ -34,7 +34,7 @@ class ImageFile(models.Model):
     school = models.CharField(verbose_name='学校', max_length=8, default='0', choices=SCHOOL, null=True, blank=True,
                               db_index=True)
     file_path = models.FileField(upload_to=upload_path_handler(), verbose_name='图片', help_text='图片（ImageField）', null=True, blank=True)
-    create_time = models.DateTimeField(verbose_name='创建时间', help_text='创建时间（DateTimeField）',auto_now_add=True, null=True, blank=True)
+    create_time = models.DateTimeField(verbose_name='创建时间', auto_now_add=True, null=True, blank=True)
     is_deleted = models.BooleanField(verbose_name='是否删除', help_text='是否删除', default=False)
 
     def __str__(self):
@@ -45,3 +45,15 @@ class ImageFile(models.Model):
         db_table = 'image_file'
         verbose_name = '图片文件'
         verbose_name_plural = verbose_name
+
+
+class AudioFile(models.Model):
+    uid = models.CharField(verbose_name='用户对外ID', max_length=16, default='')
+    audio_path = models.FileField(upload_to=upload_path_handler('audios'), verbose_name='音频地址')
+    duration = models.IntegerField(verbose_name='音频时长')
+    size = models.IntegerField(verbose_name='音频大小')
+    create_time = models.DateTimeField(verbose_name='创建时间', auto_now_add=True)
+
+    class Meta:
+        db_table = 'audio_file'
+        verbose_name_plural = verbose_name = '音频管理'

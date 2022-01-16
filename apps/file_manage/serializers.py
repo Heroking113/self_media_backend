@@ -8,7 +8,7 @@ from django.db import transaction
 from django.db.models import Q
 from rest_framework import serializers
 
-from .models import ImageFile
+from .models import ImageFile, AudioFile
 from .tasks import async_img_sec_check
 from ..idle_manage.models import IdleManage
 from ..topic_manage.models import TopicManage
@@ -100,3 +100,10 @@ class ImageFileSerializer(serializers.ModelSerializer):
 
         # 必须要有个返回值，不然报错
         return ret
+
+
+class AudioFileSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = AudioFile
+        fields = '__all__'
