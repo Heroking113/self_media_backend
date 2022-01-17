@@ -1,4 +1,5 @@
 import logging
+import random
 import re
 import os
 
@@ -31,7 +32,7 @@ logger = logging.getLogger('cb_backend')
 @api_view(['POST'])
 def sentence_recognition(request):
     # ip 验证
-    mp3_file_path = '/Users/heroking/Documents/convertible_bond/cb_backend/media/zh_1.mp3'
+    mp3_file_path = '/media/zh_1.durationtimer.mp3'
     ret = get_sentence_recognition(mp3_file_path)
     return Response(ret)
 

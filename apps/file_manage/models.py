@@ -45,15 +45,3 @@ class ImageFile(models.Model):
         db_table = 'image_file'
         verbose_name = '图片文件'
         verbose_name_plural = verbose_name
-
-
-class AudioFile(models.Model):
-    uid = models.CharField(verbose_name='用户对外ID', max_length=16, default='')
-    audio_path = models.FileField(upload_to=upload_path_handler('audios'), verbose_name='音频地址')
-    duration = models.IntegerField(verbose_name='音频时长')
-    size = models.IntegerField(verbose_name='音频大小')
-    create_time = models.DateTimeField(verbose_name='创建时间', auto_now_add=True)
-
-    class Meta:
-        db_table = 'audio_file'
-        verbose_name_plural = verbose_name = '音频管理'
