@@ -25,8 +25,15 @@ from .models import Configuration
 from apps.bond_manage.models import SelfChooseManage, OwnConvertBond
 from ..base_convert.models import BaseConvert
 from ..base_convert.serializers import BaseConvertSerializer
+from .tasks import add
 
 logger = logging.getLogger('cb_backend')
+
+
+@api_view(['GET'])
+def test(request):
+    add.apply_async((), countdown=10)
+    return Response()
 
 
 @api_view(['POST'])

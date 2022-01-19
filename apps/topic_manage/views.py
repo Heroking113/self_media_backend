@@ -237,7 +237,7 @@ class CommentViewSet(viewsets.ModelViewSet):
     @action(methods=['GET'], detail=False)
     def person_comment_data(self, request):
         uid = request.query_params.get('uid', '')
-        queryset = CommentManage.objects.filter(Q(uid=uid) | Q(fir_comment_uid=uid))
+        queryset = CommentManage.objects.filter(Q(uid=uid) | Q(fir_comment_uid=uid)).order_by('-create_time')
         page = self.paginate_queryset(queryset)
         serializer = self.get_serializer(page, many=True)
         return self.get_paginated_response(serializer.data)

@@ -38,3 +38,8 @@ def update_user_profile(params, is_update_userprofile=True):
         if 'nickname' in params:
             CommentManage.objects.select_for_update().filter(uid=params['uid']).update(nickname=params['nickname'])
             CommentManage.objects.select_for_update().filter(fir_comment_uid=params['uid']).update(fir_comment_nickname=params['nickname'])
+
+
+@shared_task
+def add():
+    return 5

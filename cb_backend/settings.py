@@ -45,8 +45,8 @@ SCH_ID_SECRET = [
     {}, # None
     # 深大
     {
-        'APP_ID': '',
-        'APP_SECRET': ''
+        'APP_ID': 'wx63ab32c6254ec2b0',
+        'APP_SECRET': '4bf43e6e41ca0bacbab5c9e1bdc97b5e'
     },
     # 深旅
     {
@@ -60,8 +60,8 @@ SCH_ID_SECRET = [
     },
     # 哈工大
     {
-        'APP_ID': '',
-        'APP_SECRET': ''
+        'APP_ID': 'wx319c637ce3c08325',
+        'APP_SECRET': 'f1a3aae02a6b3be14ac30c47b284aab2'
     },
     # 港中大
     {
@@ -70,8 +70,8 @@ SCH_ID_SECRET = [
     },
     # 深职院
     {
-        'APP_ID': '',
-        'APP_SECRET': ''
+        'APP_ID': 'wxbfb658323ce48fca',
+        'APP_SECRET': '345d4e0517b18a869be9e483e6e051f0'
     },
     # 深信息
     {
@@ -80,13 +80,13 @@ SCH_ID_SECRET = [
     },
     # 中大
     {
-        'APP_ID': '',
-        'APP_SECRET': ''
+        'APP_ID': 'wxa3fa8208a0431e42',
+        'APP_SECRET': '2d7fac829bd0230432722ff79a356735'
     },
     # 深圳理工
     {
-        'APP_ID': '',
-        'APP_SECRET': ''
+        'APP_ID': 'wxf04cdb84352bbc1a',
+        'APP_SECRET': 'e9e50fb5f4bc9bbd80355c5e555d003d'
     },
     # 北理莫斯科
     {
