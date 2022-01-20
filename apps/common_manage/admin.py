@@ -16,6 +16,8 @@ class ConfigurationAdmin(admin.ModelAdmin):
                     'uni_val',
                     'instruction')
 
+    search_fields = ('key', 'uni_val', 'instruction')
+
     list_per_page = 20
 
 

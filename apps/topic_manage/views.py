@@ -2,6 +2,7 @@
 
 import base64
 import os
+import shutil
 from datetime import datetime
 from random import randint
 
@@ -44,7 +45,7 @@ class TopicManageViewSet(viewsets.ModelViewSet):
         快速将测试数据复制到别的学校
         """
         MEDIA_ROOT = '/Users/heroking/Documents/convertible_bond/cb_backend/media/'
-        TAR_PATH = '/Users/heroking/Documents/convertible_bond/cb_backend/media/photos/2021-12-24/'
+        TAR_PATH = '/Users/heroking/Documents/convertible_bond/cb_backend/media/photos/2022-01-15/'
         start_time = '2021-12-24 08:00:00'
         end_time = '2021-12-25 02:00:00'
         nickname_list = Configuration.objects.get(key='nickname_list').uni_val
@@ -64,7 +65,7 @@ class TopicManageViewSet(viewsets.ModelViewSet):
                 img_name = '{0:%Y%m%d%H%M%S%f}'.format(datetime.now()) + str(randint(1000000, 9999999)) + '.jpg'
                 tar_img = TAR_PATH + img_name
                 # shutil.copyfile(ini_img, tar_img)
-                t_img_paths.append('photos/2021-12-24/'+img_name)
+                t_img_paths.append('photos/2022-01-15/'+img_name)
 
             nick_index = randint(0, len(nickname_list) - 1)
             file_index = randint(0, len(files) - 1)
@@ -73,13 +74,13 @@ class TopicManageViewSet(viewsets.ModelViewSet):
             nickname = nickname_encoder.decode('utf-8')
             avatar_url = 'tmp_avatars/' + files[file_index]
             create_data.append(TopicManage(
-                uid='37jfx3o6y27',
+                uid='4wftqz5nbm3',
                 nickname=nickname,
                 avatar_url=avatar_url,
                 title=bi.title,
                 content=bi.content,
                 topic_type=bi.topic_type,
-                school='7',
+                school='6',
                 view_count=bi.view_count,
                 img_paths=','.join(t_img_paths),
                 create_time=random_date(start_time, end_time)
