@@ -1,7 +1,5 @@
 import base64
-import os
 from datetime import timedelta, datetime
-from random import randint
 
 from django.conf import settings
 from django.db import transaction
@@ -10,16 +8,15 @@ from rest_framework import viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
-from utils.exceptions import HTTP_496_MSG_SENSITIVE
-from utils.redis_cli import redisCli
-from .models import UserManage, AssetManage
-from .serializers import UserManageSerializer, AssetManageSerializer
+from .models import UserManage, AssetManage, SchUserManage
+from .serializers import UserManageSerializer, AssetManageSerializer, SchUserManageSerializer
+from .tasks import update_sch_auth_status
 
-from utils.common import set_uid, upload_path_handler
-from .models import SchUserManage
-from .serializers import SchUserManageSerializer
-from ..common_manage.tasks import update_user_profile
+from utils.common import set_uid
+from utils.exceptions import HTTP_496_MSG_SENSITIVE
 from utils.wx_util import get_openid_session_key_by_code, wx_msg_sec_check
+
+from ..common_manage.tasks import update_user_profile
 
 
 class SchUserManageViewSet(viewsets.ModelViewSet):
@@ -77,37 +74,18 @@ class SchUserManageViewSet(viewsets.ModelViewSet):
             update_data['nickname'] = nickname
         if data.get('avatar_url', ''):
             update_data['avatar_url'] = data['avatar_url']
+        if data.get('authenticate_status', ''):
+            update_data['authenticate_status'] = data['authenticate_status']
         with transaction.atomic():
             SchUserManage.objects.select_for_update().filter(uid=data['uid']).update(**update_data)
             update_user_profile.delay(data, is_update_userprofile=False)
             queryset = SchUserManage.objects.get(uid=data['uid'])
             serializer = self.get_serializer(queryset)
+            if data.get('authenticate_status', '') == '2':
+                # 当第一次采集到信息的时候，执行一个延时任务：一周之后开始执行校园身份认证算法
+                # update_sch_auth_status.apply_async((data['uid'], data['school']), countdown=10)
+                update_sch_auth_status.apply_async((data['uid'], data['school']), countdown=604800)
             return Response(serializer.data)
-
-    @action(methods=['POST'], detail=False)
-    def identity_authenticate(self, request):
-        uid = request.data.get('uid', '')
-        school_card = request.FILES.get('school_card', '')
-
-        today_dir = upload_path_handler('school_card') + '/'
-        img_dir = settings.MEDIA_ROOT + '/' + today_dir
-        if not os.path.exists(img_dir):
-            os.makedirs(img_dir)
-        img_name = '{0:%Y%m%d%H%M%S%f}'.format(datetime.now()) + str(randint(1000000, 9999999)) + '.jpg'
-
-        rela_img_path = today_dir + img_name
-        abs_img_path = img_dir + img_name
-
-        with transaction.atomic():
-            sch_query = SchUserManage.objects.select_for_update().filter(uid=uid)
-            sch_query.update(school_card=rela_img_path)
-            with open(abs_img_path, 'wb') as f:
-                # 多次写入
-                for i in school_card.chunks():
-                    f.write(i)
-            SchUserManage.handle_school_card_authenticate(abs_img_path, sch_query)
-            serializer = self.get_serializer(sch_query[0])
-        return Response(serializer.data)
 
 
 class UserManageViewSet(viewsets.ModelViewSet):

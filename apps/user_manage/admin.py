@@ -27,7 +27,6 @@ class SchUserManageAdmin(admin.ModelAdmin):
                     'wechat',
                     'mobile',
                     'authenticate_status',
-                    'school_card',
                     'avatar_url',
                     'openid',
                     'unionid',

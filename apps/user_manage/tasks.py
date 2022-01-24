@@ -6,12 +6,16 @@ from datetime import datetime
 
 from celery import shared_task
 from django.conf import settings
+from django.db import transaction
 
 from utils.common import file_name_walk
 from .models import AssetManage, UserManage, SchUserManage
 from apps.base_convert.models import BaseConvert
 from apps.bond_manage.models import OwnConvertBond
 from utils.redis_cli import redisCli
+from ..common_manage.models import Configuration
+from ..sch_user_location.models import Location
+
 
 @shared_task
 def statistic_asset_pl():
@@ -73,3 +77,55 @@ def rm_redundant_cards():
             os.remove(abs_img_path)
 
 
+@shared_task
+def update_sch_auth_status(uid, school):
+    """
+    校园认证策略：
+    1、收集到的定位信息数量小于3：有一次与标的位置的距离小于等于500m即可
+    2、收集到的定位信息数量大于等于3：有两次与标的位置的距离小于等于标准最远距离即可
+    """
+    school = int(school)
+    range_dist = eval(Configuration.objects.get(key='sch_lat_lng').uni_val)[school]
+    with transaction.atomic():
+        user_query = SchUserManage.objects.select_for_update().filter(uid=uid)
+        # 深大有两个校区，单独处理
+        if school == 1:
+            li_dist = list(Location.objects.filter(uid=uid).values('sta_dist_one', 'sta_dist_two'))
+            li_sta_dist_one = [i['sta_dist_one'] for i in li_dist]
+            li_sta_dist_two = [i['sta_dist_two'] for i in li_dist]
+            if len(li_dist) < 3:
+                in_dist_one = [i for i in li_sta_dist_one if i <= 500]
+                in_dist_two = [i for i in li_sta_dist_two if i <= 500]
+                if len(in_dist_one) or len(in_dist_two):
+                    user_query.update(authenticate_status='5')
+                    return
+                user_query.update(authenticate_status='3')
+                return
+
+            range_dist_one = int(range_dist[2])
+            range_dist_two = int(range_dist[4])
+            in_dist_one = [i for i in li_sta_dist_one if i <= range_dist_one]
+            in_dist_two = [i for i in li_sta_dist_two if i <= range_dist_two]
+            if len(in_dist_one) > 1 or len(in_dist_two) > 1:
+                user_query.update(authenticate_status='5')
+                return
+            user_query.update(authenticate_status='3')
+            return
+
+        # 其他学校的，统一按照一个校区来处理
+        li_dist = list(Location.objects.filter(uid=uid).values('sta_dist_one'))
+        li_dist = [i['sta_dist_one'] for i in li_dist]
+        if len(li_dist) < 3:
+            in_dist = [i for i in li_dist if i <= 500]
+            if len(in_dist):
+                user_query.update(authenticate_status='5')
+                return
+            user_query.update(authenticate_status='3')
+            return
+
+        range_dist = int(range_dist[2])
+        in_dist = [i for i in li_dist if i <= range_dist]
+        if len(in_dist) > 1:
+            user_query.update(authenticate_status='5')
+            return
+        user_query.update(authenticate_status='3')

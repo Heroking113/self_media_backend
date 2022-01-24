@@ -59,10 +59,10 @@ def fetch_spe_sch_config(request):
     school = int(request.query_params.get('school', 0))
     try:
         query = Configuration.objects.get(key=key).uni_val
-        config_val = eval(query)[school][1]
+        config_val = eval(query)[school]
     except Exception as e:
-        return Response({'config_val': ''})
-    return Response({'config_val': config_val})
+        return Response()
+    return Response(config_val)
 
 
 @api_view(['GET'])

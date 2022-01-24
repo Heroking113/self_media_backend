@@ -35,7 +35,8 @@ urlpatterns = [
 urlpatterns += [
     path('sch/idle/', include('apps.idle_manage.urls')),
     path('sch/topic/', include('apps.topic_manage.urls')),
-    path('sch/file/', include('apps.file_manage.urls'))
+    path('sch/file/', include('apps.file_manage.urls')),
+    path('sch/loc/', include('apps.sch_user_location.urls'))
 ]
 
 # vue页面路由

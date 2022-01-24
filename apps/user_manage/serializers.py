@@ -42,12 +42,10 @@ class SchUserManageSerializer(serializers.ModelSerializer):
 
     def to_representation(self, instance):
         data = super().to_representation(instance)
-        data.update(authenticate_status=instance.get_authenticate_status_display())
+        # data.update(authenticate_status=instance.get_authenticate_status_display())
         data.update(nickname=base64.b64decode(instance.nickname).decode('utf-8'))
         data.update(create_time=str(instance.create_time).split('.')[0])
         data.update(lasted_time=str(instance.lasted_time).split('.')[0])
-        if instance.school_card:
-            data.update(school_card=MEDIA_PATH+instance.school_card)
         if 'https://thirdwx' not in instance.avatar_url and instance.avatar_url:
             data.update(avatar_url=MEDIA_PATH+instance.avatar_url)
         return data
