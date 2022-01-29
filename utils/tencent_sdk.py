@@ -6,9 +6,10 @@ from tencentcloud.common.exception import TencentCloudSDKException
 from tencentcloud.common.profile.client_profile import ClientProfile
 from tencentcloud.common.profile.http_profile import HttpProfile
 from tencentcloud.asr.v20190614 import asr_client, models
+from tencentcloud.ft.v20200304 import ft_client, models
 
 from utils.common import encode_file_to_base64st
-from utils.exceptions import HTTP_497_REQUEST_SIZE_LIMIT_EXCEEDED
+from utils.exceptions import HTTP_497_REQUEST_SIZE_LIMIT_EXCEEDED, HTTP_493_CONVERT_FAIL
 
 TENCENT_SECRET_ID = 'AKIDKRHrADzUheJhoeEWXHkxwf7IDsIRJuKT'
 TENCENT_SECRET_KEY = 'tVquhDSR9bmhMkskNkqgFXYR8ZkeHdhU'
@@ -36,6 +37,7 @@ def tencent_ocr(img_path):
 
 
 def get_sentence_recognition(mp3_file_path):
+
     """
     接口文档：https://console.cloud.tencent.com/api/explorer?Product=asr&Version=2019-06-14&Action=SentenceRecognition
     """
@@ -68,3 +70,36 @@ def get_sentence_recognition(mp3_file_path):
 
     except TencentCloudSDKException as err:
         return {'errMsg': 'fail'}
+
+
+def face_gender_convert(img_buffer, to_gender):
+    """
+    0：男转女
+    1：女转男
+    """
+    try:
+        cred = credential.Credential(TENCENT_SECRET_ID, TENCENT_SECRET_KEY)
+        httpProfile = HttpProfile()
+        httpProfile.endpoint = "ft.tencentcloudapi.com"
+
+        clientProfile = ClientProfile()
+        clientProfile.httpProfile = httpProfile
+        client = ft_client.FtClient(cred, "ap-guangzhou", clientProfile)
+
+        req = models.SwapGenderPicRequest()
+        params = {
+            "Image": img_buffer,
+            "GenderInfos": [
+                {
+                    "Gender": to_gender
+                }
+            ]
+        }
+        req.from_json_string(json.dumps(params))
+
+        resp = client.SwapGenderPic(req)
+        ret = resp.to_json_string()
+        return json.loads(ret)['ResultImage']
+
+    except TencentCloudSDKException as err:
+        raise HTTP_493_CONVERT_FAIL(err.message)

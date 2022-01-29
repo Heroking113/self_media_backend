@@ -18,7 +18,7 @@ class ConfigurationAdmin(admin.ModelAdmin):
 
     search_fields = ('key', 'uni_val', 'instruction')
 
-    list_per_page = 20
+    list_per_page = 5
 
 
 @admin.register(SchSwiper)

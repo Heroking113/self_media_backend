@@ -1,14 +1,11 @@
 from __future__ import absolute_import
 
-import os
 import re
 from datetime import datetime
 
 from celery import shared_task
-from django.conf import settings
 from django.db import transaction
 
-from utils.common import file_name_walk
 from .models import AssetManage, UserManage, SchUserManage
 from apps.base_convert.models import BaseConvert
 from apps.bond_manage.models import OwnConvertBond
@@ -61,20 +58,6 @@ def statistic_asset_pl():
         ))
 
     AssetManage.objects.bulk_create(bulk_create_data)
-
-
-@shared_task
-def rm_redundant_cards():
-    """凌晨三点删除冗余的校卡图片"""
-    card_root = settings.MEDIA_ROOT + '/school_card/'
-    img_paths = file_name_walk(card_root)
-    sch_query = SchUserManage.objects.all().values('school_card')
-    sch_cards = [i['school_card'] for i in sch_query]
-
-    for im in img_paths:
-        if im not in sch_cards:
-            abs_img_path = settings.MEDIA_ROOT+'/'+im
-            os.remove(abs_img_path)
 
 
 @shared_task

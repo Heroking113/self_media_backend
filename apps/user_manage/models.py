@@ -1,6 +1,4 @@
-from django.db import models, transaction
-
-from utils.tencent_sdk import tencent_ocr
+from django.db import models
 
 
 class SchUserManage(models.Model):
@@ -27,7 +25,6 @@ class SchUserManage(models.Model):
         ('4', '非本校用户'),
         ('5', '本校用户')
     )
-
 
     uid = models.CharField(verbose_name='用户对外ID', max_length=16, default='')
     nickname = models.CharField(verbose_name='昵称', max_length=64, default='')

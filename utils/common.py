@@ -208,23 +208,15 @@ def ip_authentication(request_meta, ip_whitelist):
 
 
 def encode_file_to_base64st(path):
+    """将文件进行base64编码"""
     with open(path, 'rb') as f:
         buffer = base64.b64encode(f.read())
         return str(buffer, encoding="utf-8")
 
-
-def file_name_walk(file_dir):
-    file_paths = []
-    for root, dirs, files in os.walk(file_dir):
-        if '-' in root:
-            # print("root", root)  # 当前目录路径
-            # print("dirs", dirs)  # 当前路径下所有子目录
-            # print("files", files)  # 当前路径下所有非目录子文件
-            if files:
-                for fi in files:
-                    rel = root.split('/')[-1]
-                    file_paths.append('school_card/'+rel+'/'+fi)
-    return file_paths
+def decode_base64st_to_file(base64st, dest_path):
+    data = base64.b64decode(base64st)
+    with open(dest_path, 'wb') as f:
+        f.write(data)
 
 
 def str_time_prop(start, end, prop, frmt):
@@ -232,6 +224,7 @@ def str_time_prop(start, end, prop, frmt):
     etime = time.mktime(time.strptime(end, frmt))
     ptime = stime + prop * (etime - stime)
     return int(ptime)
+
 
 def random_date(start, end, frmt='%Y-%m-%d %H:%M:%S'):
     return time.strftime(frmt, time.localtime(str_time_prop(start, end, random.random(), frmt)))

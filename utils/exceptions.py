@@ -28,3 +28,15 @@ class HTTP_496_MSG_SENSITIVE(APIException):
 
 class HTTP_495_IMG_SENSITIVE(APIException):
     status_code = 495
+
+
+class HTTP_494_UPLOAD_FILE_FAIL(APIException):
+    status_code = 494
+
+
+class HTTP_493_CONVERT_FAIL(APIException):
+    status_code = 493
+
+
+class HTTP_492_PARAMS_ERROR(APIException):
+    status_code = 492

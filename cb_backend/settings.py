@@ -78,7 +78,7 @@ SCH_ID_SECRET = [
         'APP_ID': 'wx5356c44b7996f1a7',
         'APP_SECRET': '2714ecae5015bb9772d699a3a837c49d'
     },
-    # 中大
+    # 中深
     {
         'APP_ID': 'wxa3fa8208a0431e42',
         'APP_SECRET': '2d7fac829bd0230432722ff79a356735'

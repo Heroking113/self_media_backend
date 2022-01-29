@@ -7,7 +7,7 @@ from .views import (fetch_spe_config,
                     fetch_spe_sch_config,
                     SchSwiperViewSet,
                     sentence_recognition,
-                    test)
+                    img_convert)
 
 urlpatterns = [
     path('fetch_spe_config/', fetch_spe_config),
@@ -15,7 +15,7 @@ urlpatterns = [
     path('asset_info/', asset_info),
     path('fetch_spe_sch_config/', fetch_spe_sch_config),
     path('sentence_recognition/', sentence_recognition),
-    path('test/', test)
+    path('img_convert/', img_convert)
 ]
 
 router = DefaultRouter()

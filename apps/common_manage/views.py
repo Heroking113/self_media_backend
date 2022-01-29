@@ -2,18 +2,24 @@ import logging
 import random
 import re
 import os
+import base64
+from datetime import datetime
 
 from django.conf import settings
+from django.core.files.base import ContentFile
+from django.core.files.storage import default_storage
 from django.db import transaction
 from django.db.models import Q
 from rest_framework import viewsets, mixins
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
+from tencentcloud.common.exception import TencentCloudSDKException
 
-from utils.common import ip_authentication
-from utils.exceptions import HTTP_498_NOT_IN_IP_WHITELIST
-from utils.tencent_sdk import get_sentence_recognition
+from utils.common import ip_authentication, decode_base64st_to_file, encode_file_to_base64st
+from utils.exceptions import HTTP_498_NOT_IN_IP_WHITELIST, HTTP_494_UPLOAD_FILE_FAIL, HTTP_493_CONVERT_FAIL, \
+    HTTP_492_PARAMS_ERROR
+from utils.tencent_sdk import get_sentence_recognition, face_gender_convert
 from .models import SchSwiper
 from .serializers import SchSwiperSerializer
 
@@ -30,10 +36,43 @@ from .tasks import add
 logger = logging.getLogger('cb_backend')
 
 
-@api_view(['GET'])
-def test(request):
-    add.apply_async((), countdown=10)
-    return Response()
+@api_view(['POST'])
+def img_convert(request):
+    convert_type = request.data.get('convert_type', '')
+    to_gender = int(request.data.get('to_gender', '0'))
+    img = request.FILES.get('img')
+    img_name = request.FILES.get('img').name
+
+    if not convert_type:
+        raise HTTP_492_PARAMS_ERROR('系统错误，请稍后再试或联系客服')
+
+    base_path = settings.MEDIA_ROOT + '/tmp_funny_imgs/'
+    try:
+        default_storage.save(base_path + img_name, ContentFile(img.read()))
+    except:
+        raise HTTP_494_UPLOAD_FILE_FAIL('上传图片失败，请稍后再试或联系我们')
+
+    save_img_name = 'converted_' + img_name
+    dest_path = base_path + save_img_name
+
+    # img_url = settings.DOMAIN + '/media/tmp_funny_imgs/' + img_name
+    img_buffer = encode_file_to_base64st(base_path+img_name)
+    b64_img = ''
+    if convert_type == '人像渐变':
+        pass
+    if convert_type == '人像动漫化':
+        pass
+    if convert_type == '人脸年龄变化':
+        pass
+    if convert_type == '人脸性别转换':
+        b64_img = face_gender_convert(img_buffer, to_gender)
+
+    img_data = base64.b64decode(b64_img)
+    with open(dest_path, 'wb') as f:
+        f.write(img_data)
+
+    ret_img_url = settings.DOMAIN + '/media/tmp_funny_imgs/' + save_img_name
+    return Response({'fin_img': ret_img_url})
 
 
 @api_view(['POST'])

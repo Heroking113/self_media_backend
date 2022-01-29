@@ -47,6 +47,10 @@ class ImageFileSerializer(serializers.ModelSerializer):
             ))
             # 检测图片
             now_date = datetime.now().strftime('%Y-%m-%d')
+            # 如果该图片路径不存在则创建
+            img_abs_path = settings.MEDIA_ROOT + '/photos/' + now_date
+            if not os.path.exists(img_abs_path):
+                os.mkdir(img_abs_path)
             li_params.append({
                 'file_path': str(settings.MEDIA_ROOT) + '/photos/' + now_date + '/' + url.name,
                 'inst_type': inst_type,
