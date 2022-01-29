@@ -91,7 +91,7 @@ class ImageFileSerializer(serializers.ModelSerializer):
                 IdleManage.objects.select_for_update().filter(id=inst_id).update(img_paths=img_paths)
 
         # 图片违规检测
-        async_img_sec_check(json.dumps(li_params))
+        async_img_sec_check(li_params)
 
         if inst_type == '4':
             # 更新所有相关数据的头像信息

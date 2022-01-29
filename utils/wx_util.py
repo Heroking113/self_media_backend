@@ -50,7 +50,7 @@ def get_openid_session_key_by_code(js_code, app_id, app_secret):
     raise GET_SESSION_KEY_OPENID_FAIL_598(err_msg)
 
 
-def wx_img_sec_check(school, buffer, inst_info):
+def wx_img_sec_check(school, buffer, inst_info={}):
     headers = {
         'Content-Type': 'multipart/form-data'
     }

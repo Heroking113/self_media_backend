@@ -32,6 +32,7 @@ from apps.bond_manage.models import SelfChooseManage, OwnConvertBond
 from ..base_convert.models import BaseConvert
 from ..base_convert.serializers import BaseConvertSerializer
 from .tasks import async_del_tmp_funny_imgs
+from ..file_manage.tasks import async_img_sec_check
 
 logger = logging.getLogger('cb_backend')
 
@@ -40,21 +41,31 @@ logger = logging.getLogger('cb_backend')
 def img_convert(request):
     convert_type = request.data.get('convert_type', '')
     to_gender = int(request.data.get('to_gender', '0'))
+    school = request.data.get('school', '0')
+    uid_ = request.data.get('uid', '0') + '_'
     img = request.FILES.get('img')
-    img_name = request.FILES.get('img').name
+    img_name = uid_ + request.FILES.get('img').name
 
+    # 参数不对
     if not convert_type:
         raise HTTP_492_PARAMS_ERROR('系统错误，请稍后再试或联系客服')
 
+    # 存储原图
     base_path = settings.MEDIA_ROOT + '/tmp_funny_imgs/'
     try:
         default_storage.save(base_path + img_name, ContentFile(img.read()))
     except:
         raise HTTP_494_UPLOAD_FILE_FAIL('上传图片失败，请稍后再试或联系我们')
 
-    save_img_name = 'converted_' + img_name
-    dest_path = base_path + save_img_name
+    # 检查图片是否违规
+    check_params = [{
+        'file_path': base_path + img_name,
+        'school': school,
+        'inst_type': '-1'
+    }]
+    async_img_sec_check(check_params)
 
+    # 执行图片转换
     # img_url = settings.DOMAIN + '/media/tmp_funny_imgs/' + img_name
     img_buffer = encode_file_to_base64st(base_path+img_name)
     b64_img = ''
@@ -68,6 +79,8 @@ def img_convert(request):
         b64_img = face_gender_convert(img_buffer, to_gender)
 
     img_data = base64.b64decode(b64_img)
+    save_img_name = 'converted_' + img_name
+    dest_path = base_path + save_img_name
     with open(dest_path, 'wb') as f:
         f.write(img_data)
 
