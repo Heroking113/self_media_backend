@@ -65,10 +65,13 @@ def img_convert(request):
     }]
     async_img_sec_check(check_params)
 
-    # 执行图片转换
-    # img_url = settings.DOMAIN + '/media/tmp_funny_imgs/' + img_name
-    img_buffer = encode_file_to_base64st(base_path+img_name)
-    b64_img = ''
+    # 执行图片转换:生产环境的图片参数为url，开发环境的图片参数为base64
+    img_buffer = img_url = ''
+    if settings.ENV == 'DEV':
+        img_buffer = encode_file_to_base64st(base_path+img_name)
+    else:
+        img_url = settings.DOMAIN + '/media/tmp_funny_imgs/' + img_name
+    convert_img_url = ''
     if convert_type == '人像渐变':
         pass
     if convert_type == '人像动漫化':
@@ -76,19 +79,14 @@ def img_convert(request):
     if convert_type == '人脸年龄变化':
         pass
     if convert_type == '人脸性别转换':
-        b64_img = face_gender_convert(img_buffer, to_gender)
+        kwargs = {'to_gender': to_gender, 'img_buffer': img_buffer, 'img_url': img_url}
+        logger.info(kwargs)
+        convert_img_url = face_gender_convert(**kwargs)
 
-    img_data = base64.b64decode(b64_img)
-    save_img_name = 'converted_' + img_name
-    dest_path = base_path + save_img_name
-    with open(dest_path, 'wb') as f:
-        f.write(img_data)
-
-    ret_img_url = settings.DOMAIN + '/media/tmp_funny_imgs/' + save_img_name
-    img_paths = [base_path+img_name, base_path+save_img_name]
+    img_paths = [base_path+img_name]
     # 一小时之后删除缓存的图片
     async_del_tmp_funny_imgs.apply_async((img_paths,), countdown=3600)
-    return Response({'fin_img': ret_img_url})
+    return Response({'fin_img': convert_img_url})
 
 
 @api_view(['POST'])

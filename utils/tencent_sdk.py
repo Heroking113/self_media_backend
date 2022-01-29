@@ -72,8 +72,9 @@ def get_sentence_recognition(mp3_file_path):
         return {'errMsg': 'fail'}
 
 
-def face_gender_convert(img_buffer, to_gender):
+def face_gender_convert(to_gender, img_buffer, img_url=''):
     """
+    人脸性别变换
     0：男转女
     1：女转男
     """
@@ -89,17 +90,49 @@ def face_gender_convert(img_buffer, to_gender):
         req = models.SwapGenderPicRequest()
         params = {
             "Image": img_buffer,
+            "Url": img_url,
             "GenderInfos": [
                 {
                     "Gender": to_gender
                 }
-            ]
+            ],
+            "RspImgType": "url"
+        }
+        req.from_json_string(json.dumps(params))
+        resp = client.SwapGenderPic(req)
+        ret = resp.to_json_string()
+        return json.loads(ret)['ResultUrl']
+    except TencentCloudSDKException as err:
+        raise HTTP_493_CONVERT_FAIL(err.message)
+
+
+def img_animation():
+    """图片动漫化"""
+
+    import json
+    from tencentcloud.common import credential
+    from tencentcloud.common.profile.client_profile import ClientProfile
+    from tencentcloud.common.profile.http_profile import HttpProfile
+    from tencentcloud.common.exception.tencent_cloud_sdk_exception import TencentCloudSDKException
+    from tencentcloud.ft.v20200304 import ft_client, models
+    try:
+        cred = credential.Credential(TENCENT_SECRET_ID, TENCENT_SECRET_KEY)
+        httpProfile = HttpProfile()
+        httpProfile.endpoint = "ft.tencentcloudapi.com"
+
+        clientProfile = ClientProfile()
+        clientProfile.httpProfile = httpProfile
+        client = ft_client.FtClient(cred, "ap-guangzhou", clientProfile)
+
+        req = models.FaceCartoonPicRequest()
+        params = {
+            "Url": "https://www.xizhengmy.cn/media/tmp/IMG_20170712_000926.jpg",
+            "RspImgType": "url"
         }
         req.from_json_string(json.dumps(params))
 
-        resp = client.SwapGenderPic(req)
-        ret = resp.to_json_string()
-        return json.loads(ret)['ResultImage']
+        resp = client.FaceCartoonPic(req)
+        print(resp.to_json_string())
 
     except TencentCloudSDKException as err:
-        raise HTTP_493_CONVERT_FAIL(err.message)
+        print(err)
