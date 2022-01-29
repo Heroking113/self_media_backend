@@ -1,3 +1,5 @@
+import os
+
 from celery import shared_task
 from django.conf import settings
 from django.db import transaction
@@ -43,3 +45,9 @@ def update_user_profile(params, is_update_userprofile=True):
 @shared_task
 def add():
     return 5
+
+
+@shared_task
+def async_del_tmp_funny_imgs(img_paths):
+    for path in img_paths:
+        os.remove(path)

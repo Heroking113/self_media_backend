@@ -31,7 +31,7 @@ from .models import Configuration
 from apps.bond_manage.models import SelfChooseManage, OwnConvertBond
 from ..base_convert.models import BaseConvert
 from ..base_convert.serializers import BaseConvertSerializer
-from .tasks import add
+from .tasks import async_del_tmp_funny_imgs
 
 logger = logging.getLogger('cb_backend')
 
@@ -72,6 +72,9 @@ def img_convert(request):
         f.write(img_data)
 
     ret_img_url = settings.DOMAIN + '/media/tmp_funny_imgs/' + save_img_name
+    img_paths = [base_path+img_name, base_path+save_img_name]
+    # 一小时之后删除缓存的图片
+    async_del_tmp_funny_imgs.apply_async((img_paths,), countdown=3600)
     return Response({'fin_img': ret_img_url})
 
 
