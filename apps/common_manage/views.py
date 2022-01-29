@@ -19,7 +19,7 @@ from tencentcloud.common.exception import TencentCloudSDKException
 from utils.common import ip_authentication, decode_base64st_to_file, encode_file_to_base64st
 from utils.exceptions import HTTP_498_NOT_IN_IP_WHITELIST, HTTP_494_UPLOAD_FILE_FAIL, HTTP_493_CONVERT_FAIL, \
     HTTP_492_PARAMS_ERROR
-from utils.tencent_sdk import get_sentence_recognition, face_gender_convert
+from utils.tencent_sdk import get_sentence_recognition, face_gender_convert, img_animation, face_age_change
 from .models import SchSwiper
 from .serializers import SchSwiperSerializer
 
@@ -41,6 +41,7 @@ logger = logging.getLogger('cb_backend')
 def img_convert(request):
     convert_type = request.data.get('convert_type', '')
     to_gender = int(request.data.get('to_gender', '0'))
+    age = int(request.data.get('age', 11))
     school = request.data.get('school', '0')
     uid_ = request.data.get('uid', '0') + '_'
     img = request.FILES.get('img')
@@ -71,22 +72,21 @@ def img_convert(request):
         img_buffer = encode_file_to_base64st(base_path+img_name)
     else:
         img_url = settings.DOMAIN + '/media/tmp_funny_imgs/' + img_name
-    convert_img_url = ''
-    if convert_type == '人像渐变':
-        pass
+    transform_img_url = ''
     if convert_type == '人像动漫化':
-        pass
+        kwargs = {'img_buffer': img_buffer, 'img_url': img_url}
+        transform_img_url = img_animation(**kwargs)
     if convert_type == '人脸年龄变化':
-        pass
+        kwargs = {'age': age, 'img_buffer': img_buffer, 'img_url': img_url}
+        transform_img_url = face_age_change(**kwargs)
     if convert_type == '人脸性别转换':
         kwargs = {'to_gender': to_gender, 'img_buffer': img_buffer, 'img_url': img_url}
-        logger.info(kwargs)
-        convert_img_url = face_gender_convert(**kwargs)
+        transform_img_url = face_gender_convert(**kwargs)
 
     img_paths = [base_path+img_name]
     # 一小时之后删除缓存的图片
     async_del_tmp_funny_imgs.apply_async((img_paths,), countdown=3600)
-    return Response({'fin_img': convert_img_url})
+    return Response({'fin_img': transform_img_url})
 
 
 @api_view(['POST'])

@@ -72,9 +72,9 @@ def get_sentence_recognition(mp3_file_path):
         return {'errMsg': 'fail'}
 
 
-def face_gender_convert(to_gender, img_buffer, img_url=''):
+def face_gender_convert(to_gender, img_buffer='', img_url=''):
     """
-    人脸性别变换
+    人脸性别转换
     0：男转女
     1：女转男
     """
@@ -106,15 +106,39 @@ def face_gender_convert(to_gender, img_buffer, img_url=''):
         raise HTTP_493_CONVERT_FAIL(err.message)
 
 
-def img_animation():
-    """图片动漫化"""
+def face_age_change(age, img_buffer='', img_url=''):
+    """人脸年龄变化"""
+    try:
+        cred = credential.Credential(TENCENT_SECRET_ID, TENCENT_SECRET_KEY)
+        httpProfile = HttpProfile()
+        httpProfile.endpoint = "ft.tencentcloudapi.com"
 
-    import json
-    from tencentcloud.common import credential
-    from tencentcloud.common.profile.client_profile import ClientProfile
-    from tencentcloud.common.profile.http_profile import HttpProfile
-    from tencentcloud.common.exception.tencent_cloud_sdk_exception import TencentCloudSDKException
-    from tencentcloud.ft.v20200304 import ft_client, models
+        clientProfile = ClientProfile()
+        clientProfile.httpProfile = httpProfile
+        client = ft_client.FtClient(cred, "ap-guangzhou", clientProfile)
+
+        req = models.ChangeAgePicRequest()
+        params = {
+            "Image": img_buffer,
+            "Url": img_url,
+            "AgeInfos": [
+                {
+                    "Age": age
+                }
+            ],
+            "RspImgType": "url"
+        }
+        req.from_json_string(json.dumps(params))
+
+        resp = client.ChangeAgePic(req)
+        ret = resp.to_json_string()
+        return json.loads(ret)['ResultUrl']
+    except TencentCloudSDKException as err:
+        raise HTTP_493_CONVERT_FAIL(err.message)
+
+
+def img_animation(img_buffer='', img_url=''):
+    """人像动漫化"""
     try:
         cred = credential.Credential(TENCENT_SECRET_ID, TENCENT_SECRET_KEY)
         httpProfile = HttpProfile()
@@ -126,13 +150,15 @@ def img_animation():
 
         req = models.FaceCartoonPicRequest()
         params = {
-            "Url": "https://www.xizhengmy.cn/media/tmp/IMG_20170712_000926.jpg",
+            "Image": img_buffer,
+            "Url": img_url,
             "RspImgType": "url"
         }
         req.from_json_string(json.dumps(params))
 
         resp = client.FaceCartoonPic(req)
-        print(resp.to_json_string())
-
+        ret = resp.to_json_string()
+        return json.loads(ret)['ResultUrl']
     except TencentCloudSDKException as err:
-        print(err)
+        raise HTTP_493_CONVERT_FAIL(err.message)
+
