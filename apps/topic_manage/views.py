@@ -14,7 +14,7 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 
 from utils.common import random_date
-from utils.exceptions import HTTP_496_MSG_SENSITIVE
+from utils.exceptions import HTTP_496_MSG_SENSITIVE, HTTP_491_TOPIC_EXCEED_WORD_LIMIT
 from utils.pagination import CommentMsgPagination, TopicPagination
 from utils.wx_util import wx_msg_sec_check
 from .models import TopicManage, CommentManage
@@ -30,13 +30,17 @@ class TopicManageViewSet(viewsets.ModelViewSet):
 
     @action(methods=['POST'], detail=False)
     def test(self, request):
-        openid = request.data.get('openid', '')
-        content = request.data.get('content', '')
-        school = request.data.get('school', '')
-        title = request.data.get('title', '')
-        ret = wx_msg_sec_check(school, openid, content, title)
-        if ret['suggest'] == 'pass':
-            raise HTTP_496_MSG_SENSITIVE('存在违规/敏感信息')
+        """更新所有的帖子标题和内容为base64编码"""
+        with transaction.atomic():
+            queryset = list(TopicManage.objects.select_for_update().all())
+            for qi in queryset:
+                content = base64.b64encode(qi.content.encode('utf-8'))
+                kwargs = {'content': content.decode('utf-8')}
+                if qi.title:
+                    title = base64.b64encode(qi.title.encode('utf-8'))
+                    kwargs['title'] = title.decode('utf-8')
+                TopicManage.objects.select_for_update().filter(id=qi.id).update(**kwargs)
+
         return Response()
 
     @action(methods=['POST'], detail=False)
@@ -116,19 +120,30 @@ class TopicManageViewSet(viewsets.ModelViewSet):
     def create(self, request, *args, **kwargs):
         # 文本是否违规检测
         data = request.data
-        openid = data.get('openid', '')
+        openid = data.pop('openid', '')
         content = data.get('content', '')
         school = data.get('school', '')
         title = data.get('title', '')
+
+        # title不能超过30个字；内容不能超过200个字
+        if len(title) > 30 or len(content) > 200:
+            raise HTTP_491_TOPIC_EXCEED_WORD_LIMIT('标题/内容长度超限')
+
         ret = wx_msg_sec_check(school, openid, content, title)
         if ret['suggest'] != 'pass':
             raise HTTP_496_MSG_SENSITIVE('内容含违规信息')
 
-        data.pop('openid')
+        if title:
+            title_encoder = base64.b64encode(title.encode('utf-8'))
+            data['title'] = title_encoder.decode('utf-8')
+
+        content_encoder = base64.b64encode(content.encode('utf-8'))
+        data['content'] = content_encoder.decode('utf-8')
+
         nickname = data.get('nickname', '')
         nickname_encoder = base64.b64encode(nickname.encode("utf-8"))
-        nickname = nickname_encoder.decode('utf-8')
-        data['nickname'] = nickname
+        data['nickname'] = nickname_encoder.decode('utf-8')
+
         serializer = self.get_serializer(data=data)
         serializer.is_valid(raise_exception=True)
         self.perform_create(serializer)
@@ -206,6 +221,18 @@ class CommentViewSet(viewsets.ModelViewSet):
     serializer_class = CommentManageSerializer
     pagination_class = CommentMsgPagination
 
+    @action(methods=['POST'], detail=False)
+    def test(self, request):
+        """更新所有的评论为base64编码"""
+        with transaction.atomic():
+            queryset = list(CommentManage.objects.select_for_update().all())
+            for qi in queryset:
+                content = base64.b64encode(qi.content.encode('utf-8'))
+                kwargs = {'content': content.decode('utf-8')}
+                CommentManage.objects.select_for_update().filter(id=qi.id).update(**kwargs)
+
+        return Response()
+
     def get_queryset(self):
         inst_id = int(self.request.query_params.get('inst_id', 0))
         return CommentManage.objects.filter(Q(inst_id=inst_id) & Q(is_deleted=False))
@@ -217,13 +244,20 @@ class CommentViewSet(viewsets.ModelViewSet):
         content = data.get('content', '')
         school = data.pop('school', '')
         ret = wx_msg_sec_check(school, openid, content)
+
+        # 评论不能超过100个字
+        if len(content) > 100:
+            raise HTTP_491_TOPIC_EXCEED_WORD_LIMIT('评论长度超限')
+
         if ret['suggest'] != 'pass':
             raise HTTP_496_MSG_SENSITIVE('内容含违规信息')
 
+        content_encoder = base64.b64encode(content.encode('utf-8'))
+        data['content'] = content_encoder.decode('utf-8')
+
         nickname = data.get('nickname', '')
         nickname_encoder = base64.b64encode(nickname.encode("utf-8"))
-        nickname = nickname_encoder.decode('utf-8')
-        data['nickname'] = nickname
+        data['nickname'] = nickname_encoder.decode('utf-8')
         if data.get('is_sec_comment', False):
             fir_comment_nickname = data['fir_comment_nickname']
             fir_comment_nickname_encoder = base64.b64encode(fir_comment_nickname.encode('utf-8'))

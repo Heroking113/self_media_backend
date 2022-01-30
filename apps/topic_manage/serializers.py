@@ -16,11 +16,10 @@ class TopicManageSerializer(serializers.ModelSerializer):
 
     def to_representation(self, instance):
         data = super().to_representation(instance)
-
-        try:
-            data.update(nickname=base64.b64decode(instance.nickname).decode('utf-8'))
-        except:
-            pass
+        data.update(nickname=base64.b64decode(instance.nickname).decode('utf-8'))
+        data.update(content=base64.b64decode(instance.content).decode('utf-8'))
+        if instance.title:
+            data.update(title=base64.b64decode(instance.title).decode('utf-8'))
 
         if 'https://thirdwx' not in instance.avatar_url:
             data.update(avatar_url=MEDIA_PATH+instance.avatar_url)
@@ -44,6 +43,7 @@ class CommentManageSerializer(serializers.ModelSerializer):
     def to_representation(self, instance):
         data = super().to_representation(instance)
         data.update(nickname=base64.b64decode(instance.nickname).decode('utf-8'))
+        data.update(content=base64.b64decode(instance.content).decode('utf-8'))
         if instance.is_sec_comment:
             data.update(fir_comment_nickname=base64.b64decode(instance.fir_comment_nickname).decode('utf-8'))
 

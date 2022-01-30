@@ -7,7 +7,6 @@ from django.contrib import admin, messages
 from django.db.models.constants import LOOKUP_SEP
 from django.utils.translation import ngettext
 
-# Register your models here.
 from django.contrib.admin import helpers
 from django.contrib.admin.options import csrf_protect_m, IncorrectLookupParameters
 from django.contrib.admin.utils import model_ngettext, lookup_needs_distinct

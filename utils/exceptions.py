@@ -40,3 +40,7 @@ class HTTP_493_CONVERT_FAIL(APIException):
 
 class HTTP_492_PARAMS_ERROR(APIException):
     status_code = 492
+
+
+class HTTP_491_TOPIC_EXCEED_WORD_LIMIT(APIException):
+    status_code = 491
