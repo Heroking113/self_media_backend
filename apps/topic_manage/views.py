@@ -31,15 +31,15 @@ class TopicManageViewSet(viewsets.ModelViewSet):
     @action(methods=['POST'], detail=False)
     def test(self, request):
         """更新所有的帖子标题和内容为base64编码"""
-        with transaction.atomic():
-            queryset = list(TopicManage.objects.select_for_update().all())
-            for qi in queryset:
-                content = base64.b64encode(qi.content.encode('utf-8'))
-                kwargs = {'content': content.decode('utf-8')}
-                if qi.title:
-                    title = base64.b64encode(qi.title.encode('utf-8'))
-                    kwargs['title'] = title.decode('utf-8')
-                TopicManage.objects.select_for_update().filter(id=qi.id).update(**kwargs)
+        # with transaction.atomic():
+        #     queryset = list(TopicManage.objects.select_for_update().all())
+        #     for qi in queryset:
+        #         content = base64.b64encode(qi.content.encode('utf-8'))
+        #         kwargs = {'content': content.decode('utf-8')}
+        #         if qi.title:
+        #             title = base64.b64encode(qi.title.encode('utf-8'))
+        #             kwargs['title'] = title.decode('utf-8')
+        #         TopicManage.objects.select_for_update().filter(id=qi.id).update(**kwargs)
 
         return Response()
 
@@ -224,12 +224,12 @@ class CommentViewSet(viewsets.ModelViewSet):
     @action(methods=['POST'], detail=False)
     def test(self, request):
         """更新所有的评论为base64编码"""
-        with transaction.atomic():
-            queryset = list(CommentManage.objects.select_for_update().all())
-            for qi in queryset:
-                content = base64.b64encode(qi.content.encode('utf-8'))
-                kwargs = {'content': content.decode('utf-8')}
-                CommentManage.objects.select_for_update().filter(id=qi.id).update(**kwargs)
+        # with transaction.atomic():
+        #     queryset = list(CommentManage.objects.select_for_update().all())
+        #     for qi in queryset:
+        #         content = base64.b64encode(qi.content.encode('utf-8'))
+        #         kwargs = {'content': content.decode('utf-8')}
+        #         CommentManage.objects.select_for_update().filter(id=qi.id).update(**kwargs)
 
         return Response()
 
