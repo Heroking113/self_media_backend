@@ -33,9 +33,10 @@ urlpatterns = [
 
 # 高校小程序路由
 urlpatterns += [
-    path('sch/idle/', include('apps.idle_manage.urls')),
+    path('sch/idle/', include('apps.idle.urls')),
     path('sch/topic/', include('apps.topic_manage.urls')),
     path('sch/file/', include('apps.file_manage.urls')),
+    path('sch/job/', include('apps.intern_job.urls')),
     path('sch/loc/', include('apps.sch_user_location.urls'))
 ]
 

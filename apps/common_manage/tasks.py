@@ -4,6 +4,8 @@ from celery import shared_task
 from django.conf import settings
 from django.db import transaction
 
+from apps.idle.models import IdleManage
+from apps.intern_job.models import JobManage
 from apps.topic_manage.models import TopicManage, CommentManage
 from apps.user_manage.models import SchUserManage
 from utils.redis_cli import redisCli
@@ -34,6 +36,11 @@ def update_user_profile(params, is_update_userprofile=True):
         if is_update_userprofile:
             # 更新用户信息
             SchUserManage.objects.select_for_update().filter(uid=params['uid']).update(**user_params)
+
+        # 更新闲置相关用户信息
+        IdleManage.objects.select_for_update().filter(uid=params['uid']).update(**user_params)
+        # 更新招聘相关用户信息
+        JobManage.objects.select_for_update().filter(uid=params['uid']).update(**user_params)
         # 更新topic相关用户信息
         TopicManage.objects.select_for_update().filter(uid=params['uid']).update(**user_params)
         # 更新评论相关用户信息

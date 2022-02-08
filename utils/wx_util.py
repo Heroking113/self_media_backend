@@ -7,7 +7,7 @@ import logging
 from django.conf import settings
 from django.db import transaction
 
-from apps.idle_manage.models import IdleManage
+from apps.idle.models import IdleManage
 from apps.topic_manage.models import TopicManage
 from utils.exceptions import GET_SESSION_KEY_OPENID_FAIL_598, HTTP_495_IMG_SENSITIVE
 from utils.redis_cli import redisCli

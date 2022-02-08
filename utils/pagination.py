@@ -30,5 +30,5 @@ class CommentMsgPagination(DataPageNumberPagination):
     page_size = 25
 
 
-class TopicPagination(DataPageNumberPagination):
+class TopicIdleJobPagination(DataPageNumberPagination):
     page_size = 10

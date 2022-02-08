@@ -69,9 +69,8 @@ class SchUserManageViewSet(viewsets.ModelViewSet):
         update_data = {}
         if nickname:
             nickname_encoder = base64.b64encode(nickname.encode("utf-8"))
-            nickname = nickname_encoder.decode('utf-8')
-            data['nickname'] = nickname
-            update_data['nickname'] = nickname
+            data['nickname'] = nickname_encoder.decode('utf-8')
+            update_data['nickname'] = nickname_encoder.decode('utf-8')
         if data.get('avatar_url', ''):
             update_data['avatar_url'] = data['avatar_url']
         if data.get('authenticate_status', ''):

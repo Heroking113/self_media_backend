@@ -10,7 +10,7 @@ from rest_framework import serializers
 
 from .models import ImageFile
 from .tasks import async_img_sec_check
-from ..idle_manage.models import IdleManage
+from ..idle.models import IdleManage
 from ..topic_manage.models import TopicManage
 from ..common_manage.tasks import update_user_profile
 

@@ -15,10 +15,11 @@ from rest_framework.response import Response
 
 from utils.common import random_date
 from utils.exceptions import HTTP_496_MSG_SENSITIVE, HTTP_491_TOPIC_EXCEED_WORD_LIMIT
-from utils.pagination import CommentMsgPagination, TopicPagination
+from utils.pagination import CommentMsgPagination, TopicIdleJobPagination
 from utils.wx_util import wx_msg_sec_check
 from .models import TopicManage, CommentManage
 from .serializers import TopicManageSerializer, CommentManageSerializer
+from .tasks import async_del_topic
 from ..common_manage.models import Configuration
 from ..file_manage.models import ImageFile
 
@@ -26,7 +27,7 @@ from ..file_manage.models import ImageFile
 class TopicManageViewSet(viewsets.ModelViewSet):
     queryset = TopicManage.objects.filter(is_deleted=False).order_by('-create_time')
     serializer_class = TopicManageSerializer
-    pagination_class = TopicPagination
+    pagination_class = TopicIdleJobPagination
 
     @action(methods=['POST'], detail=False)
     def test(self, request):
@@ -191,29 +192,41 @@ class TopicManageViewSet(viewsets.ModelViewSet):
     @action(methods=['GET'], detail=False)
     def person_data(self, request):
         uid = request.query_params.get('uid', '')
-        topic_type = request.query_params.get('topic_type', '0')
-        queryset = TopicManage.objects.filter(Q(uid=uid) & Q(topic_type=topic_type) & Q(is_deleted=False)).order_by('-create_time')
+        queryset = TopicManage.objects.filter(uid=uid).order_by('-create_time')
         page = self.paginate_queryset(queryset)
         serializer = self.get_serializer(page, many=True)
         return self.get_paginated_response(serializer.data)
 
     @action(methods=['POST'], detail=False)
-    def del_topic(self, request):
-        topic_id = int(request.data.get('topic_id', 0))
+    def del_inst(self, request):
+        inst_id = int(request.data.get('inst_id', 0))
+        img_paths = request.data.get('img_paths')
+        # async_del_topic.delay(inst_id, img_paths)
+        media_root = settings.MEDIA_ROOT
         with transaction.atomic():
-            topic_query = TopicManage.objects.select_for_update().filter(id=topic_id)
-            if not topic_query:
-                return Response()
-            img_paths = topic_query[0].img_paths.split(',')
             try:
-                for item in img_paths:
-                    os.remove(settings.MEDIA_ROOT + '/' + item)
+                for path in img_paths:
+                    img_abs_path = media_root + path.split('media')[1]
+                    os.remove(img_abs_path)
             except:
                 pass
-            ImageFile.objects.select_for_update().filter(file_path__in=img_paths).delete()
-            CommentManage.objects.select_for_update().filter(inst_id=topic_id).delete()
-            topic_query.delete()
+            TopicManage.objects.select_for_update().filter(id=inst_id).delete()
             return Response()
+
+    @action(methods=['POST'], detail=False)
+    def soft_del(self, request):
+        inst_id = int(request.data.get('inst_id', '0'))
+        TopicManage.objects.filter(id=inst_id).update(is_deleted=True)
+        return Response()
+
+    @action(methods=['GET'], detail=False)
+    def search(self, request):
+        search_str = request.query_params.get('search_str', '')
+        search_str = base64.b64encode(search_str.encode('utf-8')).decode('utf-8')
+        school = request.query_params.get('school', '0')
+        queryset = TopicManage.objects.filter(Q(school=school) & (Q(title__icontains=search_str) | Q(content__icontains=search_str))).order_by('-create_time')
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data)
 
 
 class CommentViewSet(viewsets.ModelViewSet):
@@ -270,7 +283,7 @@ class CommentViewSet(viewsets.ModelViewSet):
         return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
 
     @action(methods=['GET'], detail=False)
-    def person_comment_data(self, request):
+    def person_data(self, request):
         uid = request.query_params.get('uid', '')
         queryset = CommentManage.objects.filter(Q(uid=uid) | Q(fir_comment_uid=uid)).order_by('-create_time')
         page = self.paginate_queryset(queryset)
@@ -278,8 +291,8 @@ class CommentViewSet(viewsets.ModelViewSet):
         return self.get_paginated_response(serializer.data)
 
     @action(methods=['POST'], detail=False)
-    def del_comment(self, request):
-        comment_id = int(request.data.get('comment_id', 0))
+    def del_inst(self, request):
+        inst_id = int(request.data.get('inst_id', 0))
         with transaction.atomic():
-            CommentManage.objects.select_for_update().filter(id=comment_id).delete()
+            CommentManage.objects.select_for_update().filter(id=inst_id).delete()
             return Response()

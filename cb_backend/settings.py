@@ -130,9 +130,10 @@ INSTALLED_APPS = [
     'apps.bond_manage',
     'apps.common_manage',
     'apps.file_manage',
-    'apps.idle_manage',
     'apps.topic_manage',
-    'apps.sch_user_location'
+    'apps.sch_user_location',
+    'apps.idle',
+    'apps.intern_job'
 ]
 
 # channels相关
