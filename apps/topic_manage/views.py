@@ -30,6 +30,18 @@ class TopicManageViewSet(viewsets.ModelViewSet):
     pagination_class = TopicIdleJobPagination
 
     @action(methods=['POST'], detail=False)
+    def fast_update_create_time(self, request):
+        query = list(TopicManage.objects.all())
+        start_time = '2022-01-11 08:00:00'
+        end_time = '2022-01-12 02:00:00'
+        with transaction.atomic():
+            for item in query:
+                rand_time = random_date(start_time, end_time)
+                TopicManage.objects.select_for_update().filter(id=item.id).update(create_time=rand_time)
+
+        return Response()
+
+    @action(methods=['POST'], detail=False)
     def test(self, request):
         """更新所有的帖子标题和内容为base64编码"""
         # with transaction.atomic():
