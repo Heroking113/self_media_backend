@@ -30,14 +30,14 @@ class TopicManageViewSet(viewsets.ModelViewSet):
     pagination_class = TopicIdleJobPagination
 
     @action(methods=['POST'], detail=False)
-    def fast_update_create_time(self, request):
+    def fast_update_create_time_view_count(self, request):
         query = list(TopicManage.objects.all())
         start_time = '2022-01-11 08:00:00'
         end_time = '2022-01-12 02:00:00'
         with transaction.atomic():
             for item in query:
                 rand_time = random_date(start_time, end_time)
-                TopicManage.objects.select_for_update().filter(id=item.id).update(create_time=rand_time)
+                TopicManage.objects.select_for_update().filter(id=item.id).update(create_time=rand_time, view_count=randint(1, 200))
 
         return Response()
 
