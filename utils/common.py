@@ -176,20 +176,45 @@ def send_email(title, content):
 
 
 def format_datetime(date_time):
+    """
+    10秒内：显示"刚刚"
+    一分钟内(60s)：显示多少秒前
+    一小时内（3600s）：显示多少分钟前
+    一天内(24*3600s)：显示多少小时前
+    昨天内(48*3600s)：显示"昨天 小时:分钟"
+    前天内（72*3600s）：显示"前天 小时:分钟"
+    一年内（365*24*3600s）：显示月-日 时间
+    一年前：显示年-月-日 时间
+    """
     now = datetime.now()
+    ins_secs = int((now-date_time).total_seconds())
     zeroToday = now - timedelta(hours=now.hour, minutes=now.minute, seconds=now.second,
-                                         microseconds=now.microsecond)
-    zeroYesterday = zeroToday - timedelta(hours=23, minutes=59, seconds=60)
+                                microseconds=now.microsecond)
+    zeroYesTd = zeroToday - timedelta(hours=23, minutes=59, seconds=60)
+    zeroBeforeYesTd = zeroYesTd - timedelta(hours=23, minutes=59, seconds=60)
     if date_time >= zeroToday:
-        return date_time.strftime('%H:%M')
-    elif date_time >= zeroYesterday:
-        return date_time.strftime('昨天 %H:%M')
+        if ins_secs <= 10:
+            return '刚刚'
+        elif ins_secs <= 60:
+            return str(ins_secs) + '秒前'
+        elif ins_secs <= 3600:
+            return str(int(ins_secs / 60)) + '分钟前'
+        elif ins_secs <= 24 * 3600:
+            return str(int(ins_secs / 3600)) + '小时前'
+    elif date_time >= zeroYesTd:
+        ret_time = date_time.strftime('昨天 %H:%M')
+        return ret_time.replace(' 0', ' ')
+    elif date_time >= zeroBeforeYesTd:
+        ret_time = date_time.strftime('前天 %H:%M')
+        return ret_time.replace(' 0', ' ')
+    elif ins_secs <= 365*24*3600:
+        ret_time = date_time.strftime('%m-%d %H:%M')
+        if ret_time[0] == '0':
+            ret_time = ret_time[1:]
+        return ret_time.replace('-0', '-').replace(' 0', ' ')
     else:
-        year = int(date_time.strftime('%Y'))
-        cur_year = int(datetime.today().year)
-        if year == cur_year:
-            return date_time.strftime('%m-%d %H:%M')
-        return date_time.strftime('%y-%m-%d %H:%M')
+        ret_time = date_time.strftime('%y-%m-%d %H:%M')
+        return ret_time.replace('-0', '-').replace(' 0', ' ')
 
 
 def upload_path_handler(dir_name='photos'):
@@ -213,6 +238,7 @@ def encode_file_to_base64st(path):
         buffer = base64.b64encode(f.read())
         return str(buffer, encoding="utf-8")
 
+
 def decode_base64st_to_file(base64st, dest_path):
     data = base64.b64decode(base64st)
     with open(dest_path, 'wb') as f:
@@ -228,3 +254,10 @@ def str_time_prop(start, end, prop, frmt):
 
 def random_date(start, end, frmt='%Y-%m-%d %H:%M:%S'):
     return time.strftime(frmt, time.localtime(str_time_prop(start, end, random.random(), frmt)))
+
+
+def rand_nickname_list():
+    nickname_path = BASE_DIR +  '/tmpnickname.txt'
+    with open(nickname_path, 'r') as f:
+        data = f.read()
+        return data.replace('、', '\n').replace(' ', '').replace('。', '').split('\n')

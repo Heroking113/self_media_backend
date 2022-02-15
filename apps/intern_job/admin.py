@@ -18,7 +18,7 @@ class JobManageAdmin(admin.ModelAdmin):
     """如果某个字段允许编辑的话，是不允许对该字段的显示进行重新编码的"""
     list_display = ('id', 'uid', 'nickname', 'avatar_url', 'phone', 'wechat', 'email', 'job_name', 'job_type', 'school', 'is_deleted', 'salary', 'content', 'create_time')
     list_per_page = 50
-    list_editable = ('is_deleted',)
+    list_editable = ('is_deleted', 'job_type')
     list_filter = ('school', 'job_type')
     search_fields = ('content',)
 

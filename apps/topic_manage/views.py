@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 import base64
 import os
 import shutil
@@ -13,16 +11,15 @@ from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
-from utils.common import random_date
+from utils.common import random_date, rand_nickname_list, set_uid
 from utils.exceptions import HTTP_496_MSG_SENSITIVE, HTTP_491_TOPIC_EXCEED_WORD_LIMIT
 from utils.pagination import CommentMsgPagination, TopicIdleJobPagination
 from utils.wx_util import wx_msg_sec_check
 from .models import TopicManage, CommentManage
 from .serializers import TopicManageSerializer, CommentManageSerializer
-from .tasks import async_del_topic
 from ..common_manage.models import Configuration
-from ..file_manage.models import ImageFile
 
+BASE_DIR = str(settings.BASE_DIR)
 
 class TopicManageViewSet(viewsets.ModelViewSet):
     queryset = TopicManage.objects.filter(is_deleted=False).order_by('-create_time')
@@ -30,80 +27,98 @@ class TopicManageViewSet(viewsets.ModelViewSet):
     pagination_class = TopicIdleJobPagination
 
     @action(methods=['POST'], detail=False)
-    def fast_update_create_time_view_count(self, request):
+    def rand_spe_sch_data(self, request):
+        """将指定学校的数据随机"""
+        queryset = list(TopicManage.objects.filter(school='4'))
+        start_time = '2022-02-14 08:00:00'
+        end_time = '2022-02-15 02:00:00'
+        rand_nickname = rand_nickname_list()
+        rand_avatar_path = BASE_DIR + '/media/tmp_avatars/'
+        files = os.listdir(rand_avatar_path)
+        with transaction.atomic():
+            for q in queryset:
+                nick_index = randint(0, len(rand_nickname) - 1)
+                file_index = randint(0, len(files) - 1)
+                nickname = rand_nickname[nick_index]
+                nickname_encoder = base64.b64encode(nickname.encode("utf-8"))
+                nickname = nickname_encoder.decode('utf-8')
+                avatar_url = 'tmp_avatars/' + files[file_index]
+                uid = set_uid()
+                view_count = randint(0, 30)
+                update_data = {
+                    'uid': uid,
+                    'nickname': nickname,
+                    'avatar_url': avatar_url,
+                    'view_count': view_count,
+                    'create_time': random_date(start_time, end_time)
+                }
+                # TopicManage.objects.select_for_update().filter(id=q.id).update(**update_data)
+        return Response()
+
+    @action(methods=['POST'], detail=False)
+    def copy_data_to_sll_school(self, request):
+        """将数据复制到所有学校"""
+        MEDIA_ROOT = BASE_DIR + '/media/'
+        TAR_IMG_PATH = MEDIA_ROOT + 'photos/2022-02-15/'
+        start_time = '2022-02-14 08:00:00'
+        end_time = '2022-02-15 02:00:00'
+        rand_nickname = rand_nickname_list()
+        rand_avatar_path = MEDIA_ROOT + 'tmp_avatars/'
+        files = os.listdir(rand_avatar_path)
+
+        base_queryset = list(TopicManage.objects.filter(school='4'))
+        copy_to_school = ['1', '2', '3', '6', '7', '8', '9', '11']
+        for sch in copy_to_school:
+            create_data = []
+            with transaction.atomic():
+                for bi in base_queryset:
+                    tmp_img_paths = bi.img_paths.split(',') if bi.img_paths else ''
+                    t_img_paths = []
+                    for ii in tmp_img_paths:
+                        if not ii:
+                            break
+                        ini_img = MEDIA_ROOT + ii
+                        img_name = '{0:%Y%m%d%H%M%S%f}'.format(datetime.now()) + str(randint(1000000, 9999999)) + '.jpg'
+                        tar_img = TAR_IMG_PATH + img_name
+                        # shutil.copyfile(ini_img, tar_img)
+                        t_img_paths.append('photos/2022-02-15/' + img_name)
+
+                    nick_index = randint(0, len(rand_nickname) - 1)
+                    file_index = randint(0, len(files) - 1)
+                    nickname = rand_nickname[nick_index]
+                    nickname_encoder = base64.b64encode(nickname.encode("utf-8"))
+                    nickname = nickname_encoder.decode('utf-8')
+                    avatar_url = 'tmp_avatars/' + files[file_index]
+                    uid = set_uid()
+                    view_count = randint(0, 30)
+                    create_data.append(TopicManage(
+                        uid=uid,
+                        nickname=nickname,
+                        avatar_url=avatar_url,
+                        title=bi.title,
+                        content=bi.content,
+                        topic_type=bi.topic_type,
+                        school=sch,
+                        view_count=view_count,
+                        img_paths=','.join(t_img_paths),
+                        create_time=random_date(start_time, end_time)
+                    ))
+
+                # TopicManage.objects.bulk_create(create_data)
+
+        return Response()
+
+    @action(methods=['POST'], detail=False)
+    def update_create_time_view_count(self, request):
+        """更新所有帖子的创建时间和浏览量"""
         query = list(TopicManage.objects.all())
         start_time = '2022-01-11 08:00:00'
         end_time = '2022-01-12 02:00:00'
         with transaction.atomic():
             for item in query:
                 rand_time = random_date(start_time, end_time)
-                TopicManage.objects.select_for_update().filter(id=item.id).update(create_time=rand_time, view_count=randint(1, 200))
+                # TopicManage.objects.select_for_update().filter(id=item.id).update(create_time=rand_time, view_count=randint(1, 200))
 
-        return Response()
-
-    @action(methods=['POST'], detail=False)
-    def test(self, request):
-        """更新所有的帖子标题和内容为base64编码"""
-        # with transaction.atomic():
-        #     queryset = list(TopicManage.objects.select_for_update().all())
-        #     for qi in queryset:
-        #         content = base64.b64encode(qi.content.encode('utf-8'))
-        #         kwargs = {'content': content.decode('utf-8')}
-        #         if qi.title:
-        #             title = base64.b64encode(qi.title.encode('utf-8'))
-        #             kwargs['title'] = title.decode('utf-8')
-        #         TopicManage.objects.select_for_update().filter(id=qi.id).update(**kwargs)
-
-        return Response()
-
-    @action(methods=['POST'], detail=False)
-    def fast_bulk_create(self, request):
-        """
-        快速将测试数据复制到别的学校
-        """
-        MEDIA_ROOT = '/Users/heroking/Documents/convertible_bond/cb_backend/media/'
-        TAR_PATH = '/Users/heroking/Documents/convertible_bond/cb_backend/media/photos/2022-01-15/'
-        start_time = '2021-12-24 08:00:00'
-        end_time = '2021-12-25 02:00:00'
-        nickname_list = Configuration.objects.get(key='nickname_list').uni_val
-        nickname_list = nickname_list.split(',')
-        root_path = '/Users/heroking/Documents/convertible_bond/cb_backend/media/tmp_avatars/'
-        files = os.listdir(root_path)
-
-        base_school_2_query = list(TopicManage.objects.filter(school='2'))
-        create_data = []
-        for bi in base_school_2_query:
-            tmp_img_paths = bi.img_paths.split(',') if bi.img_paths else ''
-            t_img_paths = []
-            for ii in tmp_img_paths:
-                if not ii:
-                    break
-                ini_img = MEDIA_ROOT + ii
-                img_name = '{0:%Y%m%d%H%M%S%f}'.format(datetime.now()) + str(randint(1000000, 9999999)) + '.jpg'
-                tar_img = TAR_PATH + img_name
-                # shutil.copyfile(ini_img, tar_img)
-                t_img_paths.append('photos/2022-01-15/'+img_name)
-
-            nick_index = randint(0, len(nickname_list) - 1)
-            file_index = randint(0, len(files) - 1)
-            nickname = nickname_list[nick_index]
-            nickname_encoder = base64.b64encode(nickname.encode("utf-8"))
-            nickname = nickname_encoder.decode('utf-8')
-            avatar_url = 'tmp_avatars/' + files[file_index]
-            create_data.append(TopicManage(
-                uid='4wftqz5nbm3',
-                nickname=nickname,
-                avatar_url=avatar_url,
-                title=bi.title,
-                content=bi.content,
-                topic_type=bi.topic_type,
-                school='6',
-                view_count=bi.view_count,
-                img_paths=','.join(t_img_paths),
-                create_time=random_date(start_time, end_time)
-            ))
-
-        # TopicManage.objects.bulk_create(create_data)
         return Response()
 
     @action(methods=['POST'], detail=False)
@@ -139,7 +154,7 @@ class TopicManageViewSet(viewsets.ModelViewSet):
         title = data.get('title', '')
 
         # title不能超过30个字；内容不能超过200个字
-        if len(title) > 30 or len(content) > 200:
+        if len(title) > 30 or len(content) > 300:
             raise HTTP_491_TOPIC_EXCEED_WORD_LIMIT('标题/内容长度超限')
 
         ret = wx_msg_sec_check(school, openid, content, title)
@@ -199,7 +214,6 @@ class TopicManageViewSet(viewsets.ModelViewSet):
             topic_query.update(view_uids=view_uids, view_count=view_count)
             # 浏览量加1
             return Response({'up_status': 'plus'})
-
 
     @action(methods=['GET'], detail=False)
     def person_data(self, request):
