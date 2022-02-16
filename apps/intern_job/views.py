@@ -23,6 +23,9 @@ class JobManageViewSet(viewsets.ModelViewSet):
     serializer_class = JobManageSerializer
     pagination_class = TopicIdleJobPagination
 
+    def list(self, request, *args, **kwargs):
+        return Response()
+
     @action(methods=['POST'], detail=False)
     def rand_spe_sch_data(self, request):
         """将指定学校的数据随机"""
