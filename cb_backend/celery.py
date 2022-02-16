@@ -68,10 +68,6 @@ app.conf.update(
         'clean_up_topic_view_uids': {
             'task': 'apps.topic_manage.tasks.clean_up_topic_view_uids',
             'schedule': crontab(minute=0, hour=0)
-        },
-        'rm_redundant_cards': {
-            'task': 'apps.user_manage.tasks.rm_redundant_cards',
-            'schedule': crontab(minute=0, hour=3)
         }
     }
 )
