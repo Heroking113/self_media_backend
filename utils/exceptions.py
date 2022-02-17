@@ -44,3 +44,7 @@ class HTTP_492_PARAMS_ERROR(APIException):
 
 class HTTP_491_TOPIC_EXCEED_WORD_LIMIT(APIException):
     status_code = 491
+
+
+class HTTP_501_NET_CONGEST_ERROR(APIException):
+    status_code = 501
