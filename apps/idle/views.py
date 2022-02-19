@@ -151,15 +151,18 @@ class IdleManageViewSet(viewsets.ModelViewSet):
 
     @action(methods=['POST'], detail=False)
     def del_inst(self, request):
+        uid = request.data.get('uid', '')
         inst_id = int(request.data.get('inst_id', 0))
-        img_paths = request.data.get('img_paths')
-        media_root = settings.MEDIA_ROOT
+        img_paths = request.data.get('img_paths', [])
         with transaction.atomic():
-            try:
-                for path in img_paths:
-                    img_abs_path = media_root + path.split('media')[1]
-                    os.remove(img_abs_path)
-            except:
-                pass
-            IdleManage.objects.select_for_update().filter(id=inst_id).delete()
+            IdleManage.objects.select_for_update().filter(Q(id=inst_id) & Q(uid=uid)).delete()
+            if img_paths:
+                MEDIA_ROOT = settings.MEDIA_ROOT
+                try:
+                    for path in img_paths:
+                        if '.jpg' in path or '.png' in path:
+                            img_abs_path = MEDIA_ROOT + path.split('media')[1]
+                            os.remove(img_abs_path)
+                except:
+                    pass
             return Response()

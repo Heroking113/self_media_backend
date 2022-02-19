@@ -65,8 +65,8 @@ app.conf.update(
             'task': 'apps.common_manage.tasks.fetch_sch_all_access_token',
             'schedule': crontab(minute=0, hour='*')
         },
-        'clean_up_topic_view_uids': {
-            'task': 'apps.topic_manage.tasks.clean_up_topic_view_uids',
+        'clean_up_topic_view_ids': {
+            'task': 'apps.topic_manage.tasks.clean_up_topic_view_ids',
             'schedule': crontab(minute=0, hour=0)
         }
     }

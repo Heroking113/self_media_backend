@@ -6,6 +6,7 @@ from django.db import transaction
 
 from apps.idle.models import IdleManage
 from apps.intern_job.models import JobManage
+from apps.mutual_aid.models import MutualManage
 from apps.topic_manage.models import TopicManage, CommentManage
 from apps.user_manage.models import SchUserManage
 from utils.redis_cli import redisCli
@@ -25,7 +26,6 @@ def fetch_sch_all_access_token():
 
 @shared_task
 def update_user_profile(params, is_update_userprofile=True):
-    print('update_user_profile')
     user_params = {}
 
     if 'avatar_url' in params:
@@ -38,6 +38,8 @@ def update_user_profile(params, is_update_userprofile=True):
             # 更新用户信息
             SchUserManage.objects.select_for_update().filter(uid=params['uid']).update(**user_params)
 
+        # 更新互助相关用户信息
+        MutualManage.objects.select_for_update().filter(uid=params['uid']).update(**user_params)
         # 更新闲置相关用户信息
         IdleManage.objects.select_for_update().filter(uid=params['uid']).update(**user_params)
         # 更新招聘相关用户信息

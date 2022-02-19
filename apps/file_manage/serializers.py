@@ -12,6 +12,7 @@ from rest_framework import serializers
 from .models import ImageFile
 from .tasks import async_img_sec_check
 from ..idle.models import IdleManage
+from ..mutual_aid.models import MutualManage
 from ..topic_manage.models import TopicManage
 from ..common_manage.tasks import update_user_profile
 
@@ -89,6 +90,13 @@ class ImageFileSerializer(serializers.ModelSerializer):
                 [item.file_path.name for item in ret]) if base_img_paths else ','.join(
                 [item.file_path.name for item in ret])
             IdleManage.objects.select_for_update().filter(id=inst_id).update(img_paths=img_paths)
+        elif inst_type == '5':
+            # 互助
+            base_img_paths = MutualManage.objects.select_for_update().get(id=inst_id).img_paths
+            img_paths = base_img_paths + ',' + ','.join(
+                [item.file_path.name for item in ret]) if base_img_paths else ','.join(
+                [item.file_path.name for item in ret])
+            MutualManage.objects.select_for_update().filter(id=inst_id).update(img_paths=img_paths)
 
         # 图片违规检测
         check_times = 1

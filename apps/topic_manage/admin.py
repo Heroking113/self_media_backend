@@ -20,10 +20,22 @@ from .models import TopicManage, CommentManage
 @admin.register(TopicManage)
 class TopicManageAdmin(admin.ModelAdmin):
     """如果某个字段允许编辑的话，是不允许对该字段的显示进行重新编码的"""
-    list_display = ('id', 'uid', 'nickname', 'topic_type', 'school', 'is_deleted', 'title', 'content', 'create_time', 'img_paths')
+    list_display = ('id',
+                    'uid',
+                    'nickname',
+                    'is_top',
+                    'topic_type',
+                    'school',
+                    'is_deleted',
+                    'view_count',
+                    'comment_count',
+                    'title',
+                    'content',
+                    'create_time',
+                    'img_paths')
     list_per_page = 50
-    list_editable = ('topic_type', 'is_deleted')
-    list_filter = ('school', 'topic_type')
+    list_editable = ('topic_type', 'is_deleted', 'is_top')
+    list_filter = ('school', 'topic_type', 'is_top')
     search_fields = ('nickname', 'title', 'content')
 
     @csrf_protect_m

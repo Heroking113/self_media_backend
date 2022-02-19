@@ -30,6 +30,10 @@ class SchUserManageViewSet(viewsets.ModelViewSet):
         serializer = self.get_serializer(query, many=True)
         return Response(serializer.data)
 
+    def retrieve(self, request, *args, **kwargs):
+        """不允许通过id获取单个用户的信息"""
+        return Response()
+
     @action(methods=['POST'], detail=False)
     def login(self, request):
         js_code = request.data.get('js_code', '')

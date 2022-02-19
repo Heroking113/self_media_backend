@@ -37,7 +37,8 @@ urlpatterns += [
     path('sch/topic/', include('apps.topic_manage.urls')),
     path('sch/file/', include('apps.file_manage.urls')),
     path('sch/job/', include('apps.intern_job.urls')),
-    path('sch/loc/', include('apps.sch_user_location.urls'))
+    path('sch/loc/', include('apps.sch_user_location.urls')),
+    path('sch/mut/', include('apps.mutual_aid.urls'))
 ]
 
 # vue页面路由

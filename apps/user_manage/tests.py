@@ -9,4 +9,3 @@ def encode_file_to_base64st(path):
 if __name__ == '__main__':
     path = '/Users/heroking/Pictures/pictures/IMG20170707223157.jpg'
     a = encode_file_to_base64st(path)
-    print(a)

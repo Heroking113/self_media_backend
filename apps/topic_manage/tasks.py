@@ -7,20 +7,12 @@ from datetime import datetime
 from celery import shared_task
 from django.db import transaction
 from django.conf import settings
+from django.db.models import Q
 
-from apps.topic_manage.models import TopicManage
+from apps.topic_manage.models import TopicManage, CommentManage
 
-
-@shared_task
-def clean_up_topic_view_uids():
-    with transaction.atomic():
-        TopicManage.objects.select_for_update().all().update(view_uids='')
 
 @shared_task
-def async_del_topic(inst_id, img_paths):
-    media_root = settings.MEDIA_ROOT
+def clean_up_topic_view_ids():
     with transaction.atomic():
-        for path in img_paths:
-            img_abs_path = media_root + path.split('media')[1]
-            os.remove(img_abs_path)
-        TopicManage.objects.select_for_update().filter(id=inst_id).delete()
+        TopicManage.objects.select_for_update().all().update(view_ids='')

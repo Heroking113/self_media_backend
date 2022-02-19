@@ -12,6 +12,7 @@ class ImageFile(models.Model):
         ('2', 'topic'), # 树洞 / 表白墙 / 卖舍友
         ('3', 'idle'),
         ('4', 'avatar'),
+        ('5', 'mutual')
     )
 
     SCHOOL = (
@@ -40,8 +41,7 @@ class ImageFile(models.Model):
     def __str__(self):
         return self.file_path
 
-
     class Meta:
         db_table = 'image_file'
-        verbose_name = '图片文件'
+        verbose_name = '图片管理'
         verbose_name_plural = verbose_name

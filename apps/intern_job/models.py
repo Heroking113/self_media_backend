@@ -34,9 +34,10 @@ class JobManage(models.Model):
     job_name = models.CharField(verbose_name='岗位名称', max_length=128, default='')
     content = models.TextField(verbose_name='岗位描述', default='')
     salary = models.CharField(verbose_name='薪资', max_length=128, default='')
-    job_type = models.CharField(verbose_name='工作类型', max_length=8, default='0', choices=JOB_TYPE)
+    job_type = models.CharField(verbose_name='工作类型', max_length=8, default='0', choices=JOB_TYPE, db_index=True)
     school = models.CharField(verbose_name='学校', max_length=8, default='0', choices=SCHOOL, db_index=True)
     is_deleted = models.BooleanField(verbose_name='是否删除', default=False)
+    deleter_uid = models.CharField(verbose_name='下架该数据的uid', max_length=16, default='')
     create_time = models.DateTimeField(verbose_name='创建的时间', help_text='创建的时间', auto_now_add=True)
 
     class Meta:

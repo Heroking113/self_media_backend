@@ -133,7 +133,8 @@ INSTALLED_APPS = [
     'apps.topic_manage',
     'apps.sch_user_location',
     'apps.idle',
-    'apps.intern_job'
+    'apps.intern_job',
+    'apps.mutual_aid'
 ]
 
 # channels相关

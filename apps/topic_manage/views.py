@@ -1,5 +1,7 @@
 import base64
+import json
 import os
+import logging
 import shutil
 from datetime import datetime
 from random import randint
@@ -20,6 +22,8 @@ from .serializers import TopicManageSerializer, CommentManageSerializer
 from ..common_manage.models import Configuration
 
 BASE_DIR = str(settings.BASE_DIR)
+
+logger = logging.getLogger('cb_backend')
 
 class TopicManageViewSet(viewsets.ModelViewSet):
     queryset = TopicManage.objects.filter(is_deleted=False).order_by('-create_time')
@@ -185,68 +189,126 @@ class TopicManageViewSet(viewsets.ModelViewSet):
     def sch_list(self, request):
         school=request.query_params.get('school', '0')
         topic_type = request.query_params.get('topic_type', None)
-        if topic_type:
-            queryset = TopicManage.objects.filter(Q(school=school) & Q(topic_type=topic_type) & Q(is_deleted=False)).order_by('-create_time')
+        is_top = request.query_params.get('is_top', None)
+        manage_data = request.query_params.get('manage_data', False)
+
+        if manage_data:
+            queryset = TopicManage.objects.filter(
+                Q(school=school)
+                & Q(is_deleted=False)).order_by('-create_time')
+        elif is_top:
+            queryset = TopicManage.objects.filter(
+                Q(school=school)
+                & Q(is_top=True)
+                & Q(is_deleted=False)).order_by('-create_time')
+        elif topic_type:
+            queryset = TopicManage.objects.filter(
+                Q(school=school)
+                & Q(is_top=False)
+                & Q(topic_type=topic_type)
+                & Q(is_deleted=False)).order_by('-create_time')
         else:
-            queryset = TopicManage.objects.filter(Q(school=school) & Q(is_deleted=False)).order_by('-create_time')
+            queryset = TopicManage.objects.filter(
+                Q(school=school)
+                & Q(is_top=False)
+                & Q(is_deleted=False)).order_by('-create_time')
         page = self.paginate_queryset(queryset)
         serializer = self.get_serializer(page, many=True)
         return self.get_paginated_response(serializer.data)
 
     @action(methods=['POST'], detail=False)
-    def update_detail(self, request):
-        school = int(request.data.get('school', '0'))
-        uid = request.data.get('uid', '')
-        inst_id = request.data.get('inst_id', 0)
-        view_count = request.data.get('view_count', 0)
-
-        limit_query = eval(Configuration.objects.get(key='topic_view_count_limit').uni_val)
-        is_limit_open = True if limit_query[school][1] == 'open' else False
+    def update_comment_count(self, request):
         with transaction.atomic():
+            inst_id = int(request.data.get('inst_id', -1))
+            # change_status: up（提升)；down（下降）
+            change_status = request.data.get('change_status', None)
+            count = int(request.data.get('count', -1))
+            queryset = TopicManage.objects.select_for_update().filter(id=inst_id)
+            if change_status == 'up' and count >= 0:
+                queryset.update(comment_count=count)
+            elif change_status == 'down':
+                base_comment_count = queryset[0].comment_count
+                down_count = base_comment_count - 1 if base_comment_count > 0 else 0
+                queryset.update(comment_count=down_count)
+            return Response()
+
+    @action(methods=['POST'], detail=False)
+    def update_detail(self, request):
+        with transaction.atomic():
+            school = int(request.data.get('school', -1))
+            user_id = str(request.data.get('user_id', '-1'))
+            inst_id = int(request.data.get('inst_id', -1))
+            view_count = int(request.data.get('view_count', 0))
+            change_liker_ids = request.data.get('change_liker_ids', False)
+            liker_ids = request.data.get('liker_ids', '')
+
+            ret_info = {}
+            update_data = {}
             topic_query = TopicManage.objects.select_for_update().filter(id=inst_id)
-            if not is_limit_open:
-                topic_query.update(view_count=view_count)
-                # 浏览量加1
-                return Response({'up_status': 'plus'})
-            view_uids = topic_query[0].view_uids
-            view_uids = view_uids if view_uids else ''
-            if uid in view_uids:
-                # 浏览量不变
-                return Response({'up_status': 'original'})
-            view_uids = view_uids + uid + ','
-            topic_query.update(view_uids=view_uids, view_count=view_count)
-            # 浏览量加1
-            return Response({'up_status': 'plus'})
+
+            # 点赞量
+            if change_liker_ids:
+                update_data['liker_ids'] = liker_ids
+
+            # 浏览量
+            if view_count:
+                ret_info['view_count_status'] = 'plus'
+                limit_query = eval(Configuration.objects.get(key='topic_view_count_limit').uni_val)
+                is_limit_open = True if limit_query[school][1] == 'open' else False
+                if not is_limit_open:
+                    update_data['view_count'] = view_count
+                else:
+                    view_ids = '' if not topic_query[0].view_ids else topic_query[0].view_ids
+                    if user_id in view_ids.split(','):
+                        ret_info['view_count_status'] = 'original'
+                    else:
+                        update_data['view_count'] = view_count
+                        update_data['view_ids'] = ''.join([view_ids, user_id, ','])
+
+            update_ret = topic_query.update(**update_data)
+            ret_info['up_status'] = update_ret
+            if update_ret != 1:
+                err_msg = '更新帖子数据失败, {data}'.format(data=json.dumps(request.data))
+                logger.error(err_msg)
+            return Response(ret_info)
 
     @action(methods=['GET'], detail=False)
     def person_data(self, request):
         uid = request.query_params.get('uid', '')
-        queryset = TopicManage.objects.filter(uid=uid).order_by('-create_time')
+        queryset = TopicManage.objects.filter(Q(uid=uid) & Q(is_top=False)).order_by('-create_time')
         page = self.paginate_queryset(queryset)
         serializer = self.get_serializer(page, many=True)
         return self.get_paginated_response(serializer.data)
 
     @action(methods=['POST'], detail=False)
     def del_inst(self, request):
+        uid = request.data.get('uid', '')
         inst_id = int(request.data.get('inst_id', 0))
-        img_paths = request.data.get('img_paths')
-        # async_del_topic.delay(inst_id, img_paths)
-        media_root = settings.MEDIA_ROOT
+        img_paths = request.data.get('img_paths', [])
         with transaction.atomic():
-            try:
-                for path in img_paths:
-                    img_abs_path = media_root + path.split('media')[1]
-                    os.remove(img_abs_path)
-            except:
-                pass
-            TopicManage.objects.select_for_update().filter(id=inst_id).delete()
+            TopicManage.objects.select_for_update().filter(Q(id=inst_id) & Q(uid=uid)).delete()
+            CommentManage.objects.select_for_update().filter(inst_id=inst_id).delete()
+            if img_paths:
+                MEDIA_ROOT = settings.MEDIA_ROOT
+                try:
+                    for path in img_paths:
+                        if '.jpg' in path or '.png' in path:
+                            img_abs_path = MEDIA_ROOT + path.split('media')[1]
+                            os.remove(img_abs_path)
+                except:
+                    pass
             return Response()
 
     @action(methods=['POST'], detail=False)
     def soft_del(self, request):
-        inst_id = int(request.data.get('inst_id', '0'))
-        TopicManage.objects.filter(id=inst_id).update(is_deleted=True)
-        return Response()
+        with transaction.atomic():
+            inst_id = int(request.data.get('inst_id', '0'))
+            inst_uid = request.data.get('inst_uid', '')
+            deleter_uid = request.data.get('deleter_uid', '')
+            TopicManage.objects.select_for_update().filter(
+                Q(id=inst_id) & Q(uid=inst_uid)
+            ).update(is_deleted=True, deleter_uid=deleter_uid)
+            return Response()
 
     @action(methods=['GET'], detail=False)
     def search(self, request):
@@ -321,7 +383,8 @@ class CommentViewSet(viewsets.ModelViewSet):
 
     @action(methods=['POST'], detail=False)
     def del_inst(self, request):
+        uid = request.data.get('uid', '')
         inst_id = int(request.data.get('inst_id', 0))
         with transaction.atomic():
-            CommentManage.objects.select_for_update().filter(id=inst_id).delete()
+            CommentManage.objects.select_for_update().filter(Q(id=inst_id) & Q(uid=uid)).delete()
             return Response()

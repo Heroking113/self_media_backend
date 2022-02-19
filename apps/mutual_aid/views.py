@@ -1,5 +1,7 @@
 import base64
 import os
+import shutil
+from datetime import datetime
 from random import randint
 
 from django.conf import settings
@@ -10,17 +12,18 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 
 from utils.common import rand_nickname_list, set_uid
-from utils.exceptions import HTTP_496_MSG_SENSITIVE
+from utils.exceptions import HTTP_491_TOPIC_EXCEED_WORD_LIMIT, HTTP_496_MSG_SENSITIVE
 from utils.pagination import TopicIdleJobPagination
 from utils.wx_util import wx_msg_sec_check
-from .models import JobManage
-from .serializers import JobManageSerializer
+from .models import MutualManage
+from .serializers import MutualManageSerializer
 
 BASE_DIR = str(settings.BASE_DIR)
 
-class JobManageViewSet(viewsets.ModelViewSet):
-    queryset = JobManage.objects.filter(is_deleted=False).order_by('-create_time')
-    serializer_class = JobManageSerializer
+
+class MutualManageViewSet(viewsets.ModelViewSet):
+    queryset = MutualManage.objects.filter(is_deleted=False).order_by('-create_time')
+    serializer_class = MutualManageSerializer
     pagination_class = TopicIdleJobPagination
 
     def list(self, request, *args, **kwargs):
@@ -29,7 +32,7 @@ class JobManageViewSet(viewsets.ModelViewSet):
     @action(methods=['POST'], detail=False)
     def rand_spe_sch_data(self, request):
         """将指定学校的数据随机"""
-        queryset = list(JobManage.objects.filter(school='4'))
+        queryset = list(MutualManage.objects.filter(school='4'))
         rand_nickname = rand_nickname_list()
         rand_avatar_path = BASE_DIR + '/media/tmp_avatars/'
         files = os.listdir(rand_avatar_path)
@@ -47,23 +50,35 @@ class JobManageViewSet(viewsets.ModelViewSet):
                     'nickname': nickname,
                     'avatar_url': avatar_url
                 }
-                # JobManage.objects.select_for_update().filter(id=q.id).update(**update_data)
+                # MutualManage.objects.select_for_update().filter(id=q.id).update(**update_data)
         return Response()
 
     @action(methods=['POST'], detail=False)
     def copy_data_to_sll_school(self, request):
         """将数据复制到所有学校"""
         MEDIA_ROOT = BASE_DIR + '/media/'
+        TAR_IMG_PATH = MEDIA_ROOT + 'photos/2022-02-15/'
         rand_nickname = rand_nickname_list()
         rand_avatar_path = MEDIA_ROOT + 'tmp_avatars/'
         files = os.listdir(rand_avatar_path)
 
-        base_queryset = list(JobManage.objects.filter(school='4'))
+        base_queryset = list(MutualManage.objects.filter(school='4'))
         copy_to_school = ['1', '2', '3', '6', '7', '8', '9', '11']
         for sch in copy_to_school:
             create_data = []
             with transaction.atomic():
                 for bi in base_queryset:
+                    tmp_img_paths = bi.img_paths.split(',') if bi.img_paths else ''
+                    t_img_paths = []
+                    for ii in tmp_img_paths:
+                        if not ii:
+                            break
+                        ini_img = MEDIA_ROOT + ii
+                        img_name = '{0:%Y%m%d%H%M%S%f}'.format(datetime.now()) + str(randint(1000000, 9999999)) + '.jpg'
+                        tar_img = TAR_IMG_PATH + img_name
+                        # shutil.copyfile(ini_img, tar_img)
+                        t_img_paths.append('photos/2022-02-15/' + img_name)
+
                     nick_index = randint(0, len(rand_nickname) - 1)
                     file_index = randint(0, len(files) - 1)
                     nickname = rand_nickname[nick_index]
@@ -71,21 +86,20 @@ class JobManageViewSet(viewsets.ModelViewSet):
                     nickname = nickname_encoder.decode('utf-8')
                     avatar_url = 'tmp_avatars/' + files[file_index]
                     uid = set_uid()
-                    create_data.append(JobManage(
+                    create_data.append(MutualManage(
                         uid=uid,
                         nickname=nickname,
                         avatar_url=avatar_url,
                         phone=bi.phone,
                         wechat=bi.wechat,
-                        email=bi.email,
-                        job_name=bi.job_name,
                         content=bi.content,
                         salary=bi.salary,
-                        job_type=bi.job_type,
-                        school=sch
+                        mut_type=bi.mut_type,
+                        school=sch,
+                        img_paths=','.join(t_img_paths)
                     ))
 
-                # JobManage.objects.bulk_create(create_data)
+                # MutualManage.objects.bulk_create(create_data)
 
         return Response()
 
@@ -93,13 +107,16 @@ class JobManageViewSet(viewsets.ModelViewSet):
         # 文本是否违规检测
         data = request.data
         openid = data.pop('openid', '')
-        school = data.get('school', '')
         content = data.get('content', '')
-        job_name = data.get('job_name', '')
+        school = data.get('school', '')
 
-        ret = wx_msg_sec_check(school, openid, content, job_name)
+        # 内容不能超过500个字
+        if len(content) > 500:
+            raise HTTP_491_TOPIC_EXCEED_WORD_LIMIT('描述内容长度超限')
+
+        ret = wx_msg_sec_check(school, openid, content)
         if ret['suggest'] != 'pass':
-            raise HTTP_496_MSG_SENSITIVE('招聘信息含违规内容')
+            raise HTTP_496_MSG_SENSITIVE('描述含违规信息')
 
         nickname = data.get('nickname', '')
         nickname_encoder = base64.b64encode(nickname.encode("utf-8"))
@@ -114,12 +131,12 @@ class JobManageViewSet(viewsets.ModelViewSet):
     @action(methods=['GET'], detail=False)
     def sch_list(self, request):
         school = request.query_params.get('school', '0')
-        job_type = request.query_params.get('job_type', None)
-        if job_type:
-            queryset = JobManage.objects.filter(
-                Q(school=school) & Q(job_type=job_type) & Q(is_deleted=False)).order_by('-create_time')
+        mut_type = request.query_params.get('mut_type', None)
+        if mut_type:
+            queryset = MutualManage.objects.filter(
+                Q(school=school) & Q(mut_type=mut_type) & Q(is_deleted=False)).order_by('-create_time')
         else:
-            queryset = JobManage.objects.filter(Q(school=school) & Q(is_deleted=False)).order_by('-create_time')
+            queryset = MutualManage.objects.filter(Q(school=school) & Q(is_deleted=False)).order_by('-create_time')
         page = self.paginate_queryset(queryset)
         serializer = self.get_serializer(page, many=True)
         return self.get_paginated_response(serializer.data)
@@ -127,7 +144,7 @@ class JobManageViewSet(viewsets.ModelViewSet):
     @action(methods=['GET'], detail=False)
     def person_data(self, request):
         uid = request.query_params.get('uid', '')
-        queryset = JobManage.objects.filter(uid=uid).order_by('-create_time')
+        queryset = MutualManage.objects.filter(uid=uid).order_by('-create_time')
         page = self.paginate_queryset(queryset)
         serializer = self.get_serializer(page, many=True)
         return self.get_paginated_response(serializer.data)
@@ -136,25 +153,16 @@ class JobManageViewSet(viewsets.ModelViewSet):
     def del_inst(self, request):
         uid = request.data.get('uid', '')
         inst_id = int(request.data.get('inst_id', 0))
+        img_paths = request.data.get('img_paths', [])
         with transaction.atomic():
-            JobManage.objects.select_for_update().filter(Q(uid=uid) & Q(id=inst_id)).delete()
+            MutualManage.objects.select_for_update().filter(Q(id=inst_id) & Q(uid=uid)).delete()
+            if img_paths:
+                MEDIA_ROOT = settings.MEDIA_ROOT
+                try:
+                    for path in img_paths:
+                        if '.jpg' in path or '.png' in path:
+                            img_abs_path = MEDIA_ROOT + path.split('media')[1]
+                            os.remove(img_abs_path)
+                except:
+                    pass
             return Response()
-
-    @action(methods=['POST'], detail=False)
-    def soft_del(self, request):
-        with transaction.atomic():
-            inst_id = int(request.data.get('inst_id', '0'))
-            inst_uid = request.data.get('inst_uid', '')
-            deleter_uid = request.data.get('deleter_uid', '')
-            JobManage.objects.select_for_update().filter(
-                Q(id=inst_id) & Q(uid=inst_uid)
-            ).update(is_deleted=True, deleter_uid=deleter_uid)
-            return Response()
-
-    @action(methods=['GET'], detail=False)
-    def search(self, request):
-        search_str = request.query_params.get('search_str', '')
-        school = request.query_params.get('school', '0')
-        queryset = JobManage.objects.filter(Q(school=school) & Q(content__icontains=search_str)).order_by('-create_time')
-        serializer = self.get_serializer(queryset, many=True)
-        return Response(serializer.data)
