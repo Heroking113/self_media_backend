@@ -181,11 +181,7 @@ def asset_info(request):
     return Response(res_data)
 
 
-class ListViewSet(mixins.ListModelMixin, GenericViewSet):
-    pass
-
-
-class SchSwiperViewSet(ListViewSet):
+class SchSwiperViewSet(mixins.ListModelMixin, GenericViewSet):
     queryset = SchSwiper.objects.all()
     serializer_class = SchSwiperSerializer
     pagination_class = None

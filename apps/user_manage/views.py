@@ -90,6 +90,15 @@ class SchUserManageViewSet(viewsets.ModelViewSet):
                 update_sch_auth_status.apply_async((data['uid'], data['school']), countdown=604800)
             return Response(serializer.data)
 
+    def destroy(self, request, *args, **kwargs):
+        return Response()
+
+    def update(self, request, *args, **kwargs):
+        return Response()
+
+    def partial_update(self, request, *args, **kwargs):
+        return Response()
+
 
 class UserManageViewSet(viewsets.ModelViewSet):
     queryset = UserManage.objects.all()
@@ -135,6 +144,15 @@ class UserManageViewSet(viewsets.ModelViewSet):
         serializer = self.get_serializer(query)
         return Response(serializer.data)
 
+    def destroy(self, request, *args, **kwargs):
+        return Response()
+
+    def update(self, request, *args, **kwargs):
+        return Response()
+
+    def partial_update(self, request, *args, **kwargs):
+        return Response()
+
 
 class AssetManageViewSet(viewsets.ModelViewSet):
     queryset = AssetManage.objects.all().order_by('-create_time')
@@ -150,8 +168,6 @@ class AssetManageViewSet(viewsets.ModelViewSet):
         before_date = datetime.today() + timedelta(-before_days)
         return AssetManage.objects.filter(Q(uid=uid) & Q(create_time__gte=before_date)).order_by('-id')
 
-
-
     @action(methods=['GET'], detail=False)
     def bulk_create(self, request):
         from random import randint
@@ -162,5 +178,14 @@ class AssetManageViewSet(viewsets.ModelViewSet):
             create_time=datetime.today() + timedelta(-i)
         ) for i in range(100)]
         AssetManage.objects.bulk_create(bk_data)
+        return Response()
+
+    def destroy(self, request, *args, **kwargs):
+        return Response()
+
+    def update(self, request, *args, **kwargs):
+        return Response()
+
+    def partial_update(self, request, *args, **kwargs):
         return Response()
 

@@ -166,3 +166,12 @@ class IdleManageViewSet(viewsets.ModelViewSet):
                 except:
                     pass
             return Response()
+
+    def destroy(self, request, *args, **kwargs):
+        return Response()
+
+    def update(self, request, *args, **kwargs):
+        return Response()
+
+    def partial_update(self, request, *args, **kwargs):
+        return Response()

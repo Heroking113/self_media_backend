@@ -319,6 +319,15 @@ class TopicManageViewSet(viewsets.ModelViewSet):
         serializer = self.get_serializer(queryset, many=True)
         return Response(serializer.data)
 
+    def destroy(self, request, *args, **kwargs):
+        return Response()
+
+    def update(self, request, *args, **kwargs):
+        return Response()
+
+    def partial_update(self, request, *args, **kwargs):
+        return Response()
+
 
 class CommentViewSet(viewsets.ModelViewSet):
     queryset = CommentManage.objects.all()
@@ -388,3 +397,12 @@ class CommentViewSet(viewsets.ModelViewSet):
         with transaction.atomic():
             CommentManage.objects.select_for_update().filter(Q(id=inst_id) & Q(uid=uid)).delete()
             return Response()
+
+    def destroy(self, request, *args, **kwargs):
+        return Response()
+
+    def update(self, request, *args, **kwargs):
+        return Response()
+
+    def partial_update(self, request, *args, **kwargs):
+        return Response()

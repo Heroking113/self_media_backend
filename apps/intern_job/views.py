@@ -158,3 +158,12 @@ class JobManageViewSet(viewsets.ModelViewSet):
         queryset = JobManage.objects.filter(Q(school=school) & Q(content__icontains=search_str)).order_by('-create_time')
         serializer = self.get_serializer(queryset, many=True)
         return Response(serializer.data)
+
+    def destroy(self, request, *args, **kwargs):
+        return Response()
+
+    def update(self, request, *args, **kwargs):
+        return Response()
+
+    def partial_update(self, request, *args, **kwargs):
+        return Response()

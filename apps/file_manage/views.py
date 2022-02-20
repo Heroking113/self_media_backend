@@ -19,3 +19,12 @@ class ImageFileViewSet(viewsets.ModelViewSet):
         queryset = self.get_queryset()
         img_paths = [settings.DOMAIN + '/media/' + i['file_path'] for i in queryset.values('file_path')]
         return Response(img_paths)
+
+    def destroy(self, request, *args, **kwargs):
+        return Response()
+
+    def update(self, request, *args, **kwargs):
+        return Response()
+
+    def partial_update(self, request, *args, **kwargs):
+        return Response()
