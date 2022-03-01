@@ -19,6 +19,7 @@ from tencentcloud.common.exception import TencentCloudSDKException
 from utils.common import ip_authentication, decode_base64st_to_file, encode_file_to_base64st
 from utils.exceptions import HTTP_498_NOT_IN_IP_WHITELIST, HTTP_494_UPLOAD_FILE_FAIL, HTTP_493_CONVERT_FAIL, \
     HTTP_492_PARAMS_ERROR
+from utils.redis_cli import redisCli
 from utils.tencent_sdk import get_sentence_recognition, face_gender_convert, img_animation, face_age_change
 from .models import SchSwiper
 from .serializers import SchSwiperSerializer
@@ -189,3 +190,15 @@ class SchSwiperViewSet(mixins.ListModelMixin, GenericViewSet):
     def get_queryset(self):
         school = self.request.query_params.get('school', '0')
         return SchSwiper.objects.filter(Q(school=school) & Q(is_deleted=False))
+
+    @action(methods=['GET'], detail=False)
+    def pressure_test(self, request):
+        data = redisCli.get('turn_img')
+        if not data:
+            queryset = SchSwiper.objects.filter(Q(school='1') & Q(is_deleted=False))
+            serializer = self.get_serializer(queryset, many=True)
+            data = serializer.data
+            data = [dict(i) for i in list(data)]
+            redisCli.set('turn_img', data)
+        return Response(data)
+
