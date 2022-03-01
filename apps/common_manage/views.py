@@ -190,15 +190,3 @@ class SchSwiperViewSet(mixins.ListModelMixin, GenericViewSet):
     def get_queryset(self):
         school = self.request.query_params.get('school', '0')
         return SchSwiper.objects.filter(Q(school=school) & Q(is_deleted=False))
-
-    @action(methods=['GET'], detail=False)
-    def pressure_test(self, request):
-        data = redisCli.get('turn_img')
-        if not data:
-            queryset = SchSwiper.objects.filter(Q(school='1') & Q(is_deleted=False))
-            serializer = self.get_serializer(queryset, many=True)
-            data = serializer.data
-            data = [dict(i) for i in list(data)]
-            redisCli.set('turn_img', data)
-        return Response(data)
-
