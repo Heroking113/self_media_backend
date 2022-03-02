@@ -20,86 +20,6 @@ BASE_DIR = Path(__file__).resolve(strict=True).parent.parent
 # See https://docs.djangoproject.com/en/3.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'a2nqj%9)l8vbxtry2yfy+zlqlx9e0s#4gm*0u*8$q7d_y2g7zu'
-
-BOND_APP_ID = 'wxe33fc2974499db5f'
-BOND_APP_SECRET = '06ed44a39bce2c6fe897f22ef892f5a7'
-
-
-# APP_ID__&__APP_SECRET
-""" 
-    ('0', 'unknown'),
-    ('1', '深圳大学'),
-    ('2', '暨南大学深圳校区'),
-    ('3', '南方科技大学'),
-    ('4', '哈尔滨工业大学'),
-    ('5', '香港中文大学'),
-    ('6', '深圳职业技术学院'),
-    ('7', '深圳信息职业技术学院'),
-    ('8', '中山大学'),
-    ('9', '深圳理工大学'),
-    ('10', '北理莫斯科大学'),
-    ('11', '深圳技师学院')
-"""
-SCH_ID_SECRET = [
-    {}, # None
-    # 深大
-    {
-        'APP_ID': 'wx63ab32c6254ec2b0',
-        'APP_SECRET': '4bf43e6e41ca0bacbab5c9e1bdc97b5e'
-    },
-    # 深旅
-    {
-        'APP_ID': 'wx5ec552ab899fc7ec',
-        'APP_SECRET': 'f529e0ad26d02e8b5e4f9db1d9ebc7d4'
-    },
-    # 南科大
-    {
-        'APP_ID': 'wx1f4d15b22dad4413',
-        'APP_SECRET': '5214c49e9b2c445845b10bd144c8b50d'
-    },
-    # 哈工大
-    {
-        'APP_ID': 'wx319c637ce3c08325',
-        'APP_SECRET': 'f1a3aae02a6b3be14ac30c47b284aab2'
-    },
-    # 港中大
-    {
-        'APP_ID': '',
-        'APP_SECRET': ''
-    },
-    # 深职院
-    {
-        'APP_ID': 'wxbfb658323ce48fca',
-        'APP_SECRET': '345d4e0517b18a869be9e483e6e051f0'
-    },
-    # 深信息
-    {
-        'APP_ID': 'wx5356c44b7996f1a7',
-        'APP_SECRET': '2714ecae5015bb9772d699a3a837c49d'
-    },
-    # 中深
-    {
-        'APP_ID': 'wxa3fa8208a0431e42',
-        'APP_SECRET': '2d7fac829bd0230432722ff79a356735'
-    },
-    # 深圳理工
-    {
-        'APP_ID': 'wxf04cdb84352bbc1a',
-        'APP_SECRET': 'e9e50fb5f4bc9bbd80355c5e555d003d'
-    },
-    # 北理莫斯科
-    {
-        'APP_ID': '',
-        'APP_SECRET': ''
-    },
-    # 深技师
-    {
-        'APP_ID': 'wxe5270890fa80d028',
-        'APP_SECRET': '0dfd476f2e8b128928d054488bcf2e27'
-    }
-]
-
 
 # SECURITY WARNING: don't run with debug turned on in production!
 # 开发环境：True；生产环境：False
@@ -109,8 +29,6 @@ ENV = 'DEV'
 # ENV = 'PROD'
 
 ALLOWED_HOSTS = ['*']
-
-DOMAIN = 'http://localhost:8008' if ENV == 'DEV' else 'https://www.xizhengmy.cn'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
 
@@ -123,18 +41,7 @@ INSTALLED_APPS = [
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
-    'django.contrib.staticfiles',
-    'rest_framework',
-    'apps.user_manage',
-    'apps.base_convert',
-    'apps.bond_manage',
-    'apps.common_manage',
-    'apps.file_manage',
-    'apps.topic_manage',
-    'apps.sch_user_location',
-    'apps.idle',
-    'apps.intern_job',
-    'apps.mutual_aid'
+    'django.contrib.staticfiles'
 ]
 
 # channels相关
@@ -206,30 +113,16 @@ WSGI_APPLICATION = 'cb_backend.wsgi.application'
 #     }
 # }
 
-if ENV == 'DEV':
-    DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.mysql',  # 指定数据库驱动
-            'NAME': 'cb_db',  # 指定的数据库名
-            'USER': 'root',  # 数据库登录的用户名
-            'PASSWORD': 'Heroking113.',  # 登录数据库的密码
-            'HOST': 'localhost',
-            'PORT': 6895  # 数据库服务器端口，mysql默认为3306
-        }
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.mysql',  # 指定数据库驱动
+        'NAME': 'a',  # 指定的数据库名
+        'USER': 'a',  # 数据库登录的用户名
+        'PASSWORD': 'a',  # 登录数据库的密码
+        'HOST': 'localhost',
+        'PORT': 1234 # 数据库服务器端口，mysql默认为3306
     }
-elif ENV == 'PROD':
-    # TODO
-    DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.mysql',  # 指定数据库驱动
-            'NAME': 'cb_db',  # 指定的数据库名
-            'USER': 'root',  # 数据库登录的用户名
-            'PASSWORD': 'Kzzbackend666.',  # 登录数据库的密码
-            'HOST': 'localhost',
-            'PORT': 6895  # 数据库服务器端口，mysql默认为3306
-        }
-    }
-
+}
 
 # ============ Celery配置相关 ==================
 # Celery application definition
