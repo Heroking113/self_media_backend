@@ -11,8 +11,8 @@ from tencentcloud.ft.v20200304 import ft_client, models
 from utils.common import encode_file_to_base64st
 from utils.exceptions import HTTP_497_REQUEST_SIZE_LIMIT_EXCEEDED, HTTP_493_CONVERT_FAIL
 
-TENCENT_SECRET_ID = 'AKIDKRHrADzUheJhoeEWXHkxwf7IDsIRJuKT'
-TENCENT_SECRET_KEY = 'tVquhDSR9bmhMkskNkqgFXYR8ZkeHdhU'
+TENCENT_SECRET_ID = ''
+TENCENT_SECRET_KEY = ''
 
 import ssl
 ssl._create_default_https_context = ssl._create_unverified_context
